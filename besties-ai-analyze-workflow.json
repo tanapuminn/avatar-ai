@@ -1,0 +1,194 @@
+{
+  "name": "Besties AI — Analyze",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "besties-analyze",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-b001",
+      "name": "Webhook: Analyze",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "1dd45yr9_ceioBxb6E6mQ-XQydVug77V4Ti5fFvdCB1o",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Besties AI — KnowledgeBase",
+          "mode": "name"
+        },
+        "filtersUI": {},
+        "options": {
+          "returnAll": true
+        }
+      },
+      "id": "node-b002",
+      "name": "Sheets: Read KB",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [480, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// รับข้อมูลจาก webhook\nconst body = $('Webhook: Analyze').first()?.json?.body || {};\nconst session  = body.session  || '';\nconst teamName = body.teamName || session;\nconst apiKey   = body.apiKey   || '';\nconst customRubric = body.rubric || '';\n\nif (!session) throw new Error('session is required');\nif (!apiKey)  throw new Error('apiKey is required');\n\n// กรองข้อมูลตาม session\nconst rows = $input.all().map(r => r.json);\nconst filtered = rows.filter(r => r['Session ID'] === session);\n\nif (filtered.length === 0) throw new Error('No data found for session: ' + session);\n\n// เอาเฉพาะ STT (คำพูดผู้นำเสนอ)\nconst sttRows = filtered.filter(r => r['Type'] === 'stt');\nif (sttRows.length === 0) throw new Error('No speech data (stt) found for session: ' + session);\n\n// สร้าง transcript\nconst conversationText = sttRows\n  .map((r, i) => `[${i + 1}] ${r['Text']}`)\n  .join('\\n');\n\n// เกณฑ์การให้คะแนน\nconst rubric = customRubric || `1. ความคิดสร้างสรรค์ (Creativity) — 0-25 คะแนน: ความแปลกใหม่และความสร้างสรรค์ของไอเดีย\n2. ความเป็นไปได้ (Feasibility) — 0-25 คะแนน: สามารถนำไปทำจริงได้มากน้อยแค่ไหน\n3. ความชัดเจนในการนำเสนอ (Clarity) — 0-25 คะแนน: นำเสนอได้เข้าใจง่าย มีโครงสร้างชัดเจน\n4. ผลกระทบที่คาดหวัง (Impact) — 0-25 คะแนน: ประโยชน์และผลกระทบต่อสังคมหรือธุรกิจ`;\n\n// สร้าง prompt\nconst prompt = `คุณเป็น AI ผู้ตัดสินการแข่งขันไอเดีย กรุณาวิเคราะห์และให้คะแนนการนำเสนอต่อไปนี้อย่างเป็นกลาง\n\nทีม: ${teamName}\nจำนวนข้อความที่พูด: ${sttRows.length} ข้อความ\n\n--- บทสนทนา / การนำเสนอ ---\n${conversationText}\n--- สิ้นสุดบทสนทนา ---\n\nเกณฑ์การให้คะแนน:\n${rubric}\n\nกรุณาตอบในรูปแบบ JSON เท่านั้น ไม่มีข้อความอื่นนอก JSON:\n{\n  \"totalScore\": <รวม 0-100>,\n  \"breakdown\": {\n    \"creativity\": <0-25>,\n    \"feasibility\": <0-25>,\n    \"clarity\": <0-25>,\n    \"impact\": <0-25>\n  },\n  \"summary\": \"สรุปผลการนำเสนอภาษาไทย 2-3 ประโยค\",\n  \"strengths\": [\"จุดเด่น 1\", \"จุดเด่น 2\"],\n  \"improvements\": [\"ข้อควรปรับปรุง 1\", \"ข้อควรปรับปรุง 2\"]\n}`;\n\nreturn [{\n  json: { session, teamName, apiKey, prompt, sttCount: sttRows.length }\n}];"
+      },
+      "id": "node-b003",
+      "name": "Build Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={{ $json.apiKey }}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "string",
+        "body": "={{ JSON.stringify({ contents: [{ parts: [{ text: $json.prompt }] }], generationConfig: { temperature: 0.3, responseMimeType: 'application/json' } }) }}",
+        "options": {}
+      },
+      "id": "node-b004",
+      "name": "Gemini: Analyze",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [960, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ดึงผลจาก Gemini\nconst geminiResponse = $input.first().json;\nconst textContent = geminiResponse?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';\n\nlet result;\ntry {\n  result = JSON.parse(textContent);\n} catch (e) {\n  // ลอง extract JSON จาก text กรณีมี markdown wrapper\n  const match = textContent.match(/\\{[\\s\\S]*\\}/);\n  result = match ? JSON.parse(match[0]) : { error: 'Parse failed', raw: textContent };\n}\n\n// ดึง context จาก Build Prompt node\nconst ctx = $('Build Prompt').first().json;\nconst now = new Date().toISOString();\n\nconst totalScore  = result.totalScore || 0;\nconst creativity  = result.breakdown?.creativity  || 0;\nconst feasibility = result.breakdown?.feasibility || 0;\nconst clarity     = result.breakdown?.clarity     || 0;\nconst impact      = result.breakdown?.impact      || 0;\n\nreturn [{\n  json: {\n    session:      ctx.session,\n    teamName:     ctx.teamName,\n    totalScore,\n    creativity,\n    feasibility,\n    clarity,\n    impact,\n    summary:      result.summary      || '',\n    strengths:    JSON.stringify(result.strengths    || []),\n    improvements: JSON.stringify(result.improvements || []),\n    analyzedAt:   now,\n    sttCount:     ctx.sttCount\n  }\n}];"
+      },
+      "id": "node-b005",
+      "name": "Parse Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1dd45yr9_ceioBxb6E6mQ-XQydVug77V4Ti5fFvdCB1o",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Besties AI — Results",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Session ID":   "={{ $json.session }}",
+            "Team Name":    "={{ $json.teamName }}",
+            "Total Score":  "={{ $json.totalScore }}",
+            "Creativity":   "={{ $json.creativity }}",
+            "Feasibility":  "={{ $json.feasibility }}",
+            "Clarity":      "={{ $json.clarity }}",
+            "Impact":       "={{ $json.impact }}",
+            "Summary":      "={{ $json.summary }}",
+            "Strengths":    "={{ $json.strengths }}",
+            "Improvements": "={{ $json.improvements }}",
+            "STT Count":    "={{ $json.sttCount }}",
+            "Analyzed At":  "={{ $json.analyzedAt }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "node-b006",
+      "name": "Sheets: Save Result",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [1440, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $('Parse Result').first().json;\nreturn [{\n  json: {\n    ok: true,\n    session:   d.session,\n    teamName:  d.teamName,\n    totalScore: d.totalScore,\n    breakdown: {\n      creativity:  d.creativity,\n      feasibility: d.feasibility,\n      clarity:     d.clarity,\n      impact:      d.impact\n    },\n    summary:      d.summary,\n    strengths:    JSON.parse(d.strengths    || '[]'),\n    improvements: JSON.parse(d.improvements || '[]'),\n    sttCount:     d.sttCount,\n    analyzedAt:   d.analyzedAt\n  }\n}];"
+      },
+      "id": "node-b007",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": { "responseCode": 200 }
+      },
+      "id": "node-b008",
+      "name": "Respond: Analysis",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1920, 300]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook: Analyze": {
+      "main": [
+        [{ "node": "Sheets: Read KB", "type": "main", "index": 0 }]
+      ]
+    },
+    "Sheets: Read KB": {
+      "main": [
+        [{ "node": "Build Prompt", "type": "main", "index": 0 }]
+      ]
+    },
+    "Build Prompt": {
+      "main": [
+        [{ "node": "Gemini: Analyze", "type": "main", "index": 0 }]
+      ]
+    },
+    "Gemini: Analyze": {
+      "main": [
+        [{ "node": "Parse Result", "type": "main", "index": 0 }]
+      ]
+    },
+    "Parse Result": {
+      "main": [
+        [{ "node": "Sheets: Save Result", "type": "main", "index": 0 }]
+      ]
+    },
+    "Sheets: Save Result": {
+      "main": [
+        [{ "node": "Format Response", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format Response": {
+      "main": [
+        [{ "node": "Respond: Analysis", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "besties-ai-analyze-workflow",
+  "tags": ["besties", "analyze"]
+}

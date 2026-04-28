@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Besties AI — Display</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --yellow:      #F5C400;
+    --yellow-light:#FEF9E7;
+    --yellow-dark: #A07800;
+    --green:       #2D7A3A;
+    --bg:          #0A120C;
+    --surface:     rgba(255,255,255,0.05);
+    --border:      rgba(255,255,255,0.1);
+  }
+
+  html, body {
+    height: 100%; width: 100%;
+    background: var(--bg);
+    font-family: 'Sarabun', sans-serif;
+    overflow: hidden;
+    color: #fff;
+  }
+
+  /* ── BACKGROUND RINGS ── */
+  .bg-rings {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -55%);
+    pointer-events: none; z-index: 0;
+  }
+  .ring {
+    position: absolute; border-radius: 50%;
+    border: 1px solid rgba(245,196,0,0.07);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+  }
+  .ring-1 { width: 480px; height: 480px; }
+  .ring-2 { width: 640px; height: 640px; border-color: rgba(245,196,0,0.04); }
+  .ring-3 { width: 820px; height: 820px; border-color: rgba(245,196,0,0.025); }
+
+  /* ── LAYOUT ── */
+  .display-root {
+    position: relative; z-index: 1;
+    height: 100vh; width: 100vw;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    padding: 2rem 3rem;
+    gap: 1rem;
+  }
+
+  /* ── TOP BAR ── */
+  .top-bar {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo-mark {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-mark img {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 2px solid rgba(245,196,0,0.4); object-fit: cover; object-position: center 10%;
+  }
+  .logo-mark .logo-name { font-size: 16px; font-weight: 700; letter-spacing: 0.5px; }
+  .logo-mark .logo-sub  { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 400; }
+
+  .team-chip {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(245,196,0,0.1); border: 1px solid rgba(245,196,0,0.3);
+    padding: 8px 18px; border-radius: 30px;
+  }
+  .team-chip .team-label { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; }
+  .team-chip .team-name  { font-size: 18px; font-weight: 700; color: var(--yellow); text-align: center; }
+
+  .session-chip {
+    font-size: 11px; color: rgba(255,255,255,0.3);
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 6px 14px; border-radius: 20px;
+    font-weight: 600; letter-spacing: 0.6px;
+  }
+
+  /* ── CENTER AREA ── */
+  .center-area {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ── AVATAR COLUMN ── */
+  .avatar-col {
+    display: flex; flex-direction: column; align-items: center; gap: 1rem;
+    position: relative;
+  }
+  .avatar-glow {
+    position: absolute; width: 340px; height: 340px;
+    background: radial-gradient(circle, rgba(245,196,0,0.12) 0%, transparent 70%);
+    border-radius: 50%; pointer-events: none;
+    top: 50%; left: 50%; transform: translate(-50%, -55%);
+  }
+  .avatar-wrapper {
+    position: relative;
+    width: 300px; height: 300px; border-radius: 50%; overflow: hidden;
+    border: 3px solid rgba(245,196,0,0.3);
+    background: rgba(255,255,255,0.04);
+    transition: border-color 0.3s;
+  }
+  .avatar-wrapper img {
+    width: 100%; height: 100%; object-fit: cover; object-position: center 10%;
+    display: block;
+  }
+  .avatar-wrapper.speaking {
+    border-color: var(--yellow);
+    animation: ring-pulse 0.7s ease-in-out infinite alternate;
+  }
+  @keyframes ring-pulse {
+    from { box-shadow: 0 0 0 0 rgba(245,196,0,0.4); border-color: rgba(245,196,0,0.6); }
+    to   { box-shadow: 0 0 0 18px rgba(245,196,0,0); border-color: var(--yellow); }
+  }
+
+  /* gesture emoji overlay */
+  .gesture-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .gesture-pop { font-size: 96px; line-height: 1; opacity: 0; }
+  .gesture-pop.show { animation: gesture-pop 1.3s ease forwards; }
+  @keyframes gesture-pop {
+    0%   { opacity: 0; transform: scale(0.3) translateY(10px); }
+    20%  { opacity: 1; transform: scale(1.15) translateY(-5px); }
+    50%  { opacity: 1; transform: scale(1) translateY(0); }
+    80%  { opacity: 1; transform: scale(1) translateY(0); }
+    100% { opacity: 0; transform: scale(0.8) translateY(-24px); }
+  }
+
+  /* avatar bounce/shake */
+  .avatar-wrapper.gesture-bounce { animation: av-bounce 0.5s ease !important; }
+  .avatar-wrapper.gesture-shake  { animation: av-shake 0.5s ease !important; }
+  .avatar-wrapper.gesture-pulse  { animation: av-pulse 0.6s ease !important; }
+  @keyframes av-bounce { 0%,100%{transform:translateY(0)} 30%{transform:translateY(-14px)} 60%{transform:translateY(-6px)} }
+  @keyframes av-shake  { 0%,100%{transform:rotate(0)} 20%{transform:rotate(-6deg)} 40%{transform:rotate(6deg)} 60%{transform:rotate(-4deg)} 80%{transform:rotate(4deg)} }
+  @keyframes av-pulse  { 0%,100%{transform:scale(1)} 40%{transform:scale(1.08)} 70%{transform:scale(0.96)} }
+
+  .avatar-name { font-size: 26px; font-weight: 700; letter-spacing: -0.3px; }
+  .avatar-tagline {
+    font-size: 14px; color: rgba(255,255,255,0.4);
+    min-height: 20px; text-align: center; transition: color 0.3s;
+  }
+  .avatar-tagline.active { color: var(--yellow); }
+
+  /* waveform */
+  .waveform { display: flex; align-items: center; gap: 3px; height: 24px; margin-top: 4px; }
+  .wave-bar {
+    width: 3px; background: rgba(245,196,0,0.25); border-radius: 2px;
+    height: 6px; transition: height 0.2s;
+  }
+  .wave-bar.active { background: var(--yellow); animation: wave 0.8s ease-in-out infinite alternate; }
+  .wave-bar:nth-child(1).active { animation-delay: 0s;    height: 12px; }
+  .wave-bar:nth-child(2).active { animation-delay: 0.1s;  height: 20px; }
+  .wave-bar:nth-child(3).active { animation-delay: 0.2s;  height: 16px; }
+  .wave-bar:nth-child(4).active { animation-delay: 0.05s; height: 22px; }
+  .wave-bar:nth-child(5).active { animation-delay: 0.15s; height: 14px; }
+  .wave-bar:nth-child(6).active { animation-delay: 0.25s; height: 18px; }
+  .wave-bar:nth-child(7).active { animation-delay: 0.1s;  height: 10px; }
+  .wave-bar:nth-child(8).active { animation-delay: 0.2s;  height: 20px; }
+  .wave-bar:nth-child(9).active { animation-delay: 0.05s; height: 14px; }
+  @keyframes wave { from { transform: scaleY(0.5); } to { transform: scaleY(1.4); } }
+
+  /* ── TIMER ── */
+  .timer-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    margin-top: 10px; opacity: 0; transition: opacity 0.4s;
+  }
+  .timer-wrap.visible { opacity: 1; }
+  .timer-ring-svg { transform: rotate(-90deg); }
+  .timer-ring-bg   { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 5; }
+  .timer-ring-fill { fill: none; stroke: #4CAF50; stroke-width: 5; stroke-linecap: round;
+    transition: stroke-dashoffset 1s linear, stroke 0.5s; }
+  .timer-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+  .timer-num  { font-family: 'Sarabun', sans-serif; font-size: 32px; font-weight: 800; line-height: 1; color: #fff; letter-spacing: 1px; }
+  .timer-label { font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+  .timer-ring-container { position: relative; width: 120px; height: 120px; }
+  .timer-done-text { font-size: 15px; font-weight: 700; color: #DC2626; letter-spacing: 0.5px; animation: timer-flash 0.5s ease-in-out infinite alternate; display: none; }
+  @keyframes timer-flash { from { opacity: 1; } to { opacity: 0.3; } }
+
+  /* ── SCORE COLUMN ── */
+  .score-col {
+    position: absolute; right: 0; top: 50%; transform: translateY(-50%) translateX(40px);
+    width: 380px;
+    opacity: 0;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    pointer-events: none;
+  }
+  .score-col.visible {
+    opacity: 1; transform: translateY(-50%) translateX(0); pointer-events: auto;
+  }
+  .score-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px; padding: 1.8rem;
+  }
+  .score-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 1.4rem;
+  }
+  .score-team-label { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 4px; }
+  .score-team-name  { font-size: 18px; font-weight: 700; }
+  .score-total-num  { font-size: 48px; font-weight: 800; line-height: 1; }
+  .score-total-max  { font-size: 13px; color: rgba(255,255,255,0.4); text-align: right; margin-top: 2px; }
+
+  .score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .score-row-label { font-size: 13px; color: rgba(255,255,255,0.55); min-width: 120px; }
+  .score-bar-wrap { flex: 1; height: 7px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
+  .score-bar-fill { height: 100%; background: var(--yellow); border-radius: 4px; width: 0; transition: width 1s ease 0.3s; }
+  .score-val { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.7); min-width: 36px; text-align: right; }
+
+  .score-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 1rem 0; }
+  .score-summary { font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.7; }
+
+  .score-section-label { font-size: 11px; color: rgba(255,255,255,0.35); font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 6px; }
+  .score-bullet { font-size: 12px; color: rgba(255,255,255,0.65); padding: 2px 0; line-height: 1.5; }
+
+  .badge-result {
+    display: inline-block;
+    background: rgba(45,122,58,0.2); border: 1px solid rgba(45,122,58,0.4);
+    color: #4CAF50; font-size: 10px; font-weight: 700;
+    padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+  }
+
+  /* ── BOTTOM STATUS BAR ── */
+  .bottom-bar {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding-bottom: 0.5rem;
+  }
+  .status-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: #4CAF50;
+    animation: blink 2s ease infinite;
+  }
+  .status-dot.busy { background: var(--yellow); }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .status-text { font-size: 12px; color: rgba(255,255,255,0.4); }
+
+  /* ── WAITING STATE ── */
+  .waiting-hint {
+    text-align: center; color: rgba(255,255,255,0.2);
+    font-size: 13px; margin-top: 0.5rem;
+    animation: fade-pulse 2.5s ease infinite;
+  }
+  @keyframes fade-pulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+</style>
+</head>
+<body>
+
+<div class="bg-rings">
+  <div class="ring ring-1"></div>
+  <div class="ring ring-2"></div>
+  <div class="ring ring-3"></div>
+</div>
+
+<div class="display-root">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="logo-mark">
+      <img src="Besties.png" alt="Besties AI" onerror="this.style.display='none'">
+      <div>
+        <div class="logo-name">Besties AI</div>
+        <div class="logo-sub">BizPitching Judge</div>
+      </div>
+    </div>
+
+    <div class="team-chip">
+      <div>
+        <div class="team-label">ทีมที่กำลังนำเสนอ</div>
+        <div class="team-name" id="d-team-name">รอทีม...</div>
+      </div>
+    </div>
+
+    <div class="session-chip" id="d-session-id">SESSION —</div>
+  </div>
+
+  <!-- CENTER -->
+  <div class="center-area">
+
+    <!-- AVATAR -->
+    <div class="avatar-col">
+      <div class="avatar-glow"></div>
+      <div class="avatar-wrapper" id="d-avatar-wrapper">
+        <img src="Besties.png" alt="Besties AI"
+          onerror="this.style.display='none'">
+        <div class="gesture-overlay">
+          <div class="gesture-pop" id="d-gesture-pop"></div>
+        </div>
+      </div>
+      <div class="avatar-name">Besties AI</div>
+      <div class="avatar-tagline" id="d-tagline">กรรมการ AI สำหรับการประกวดไอเดีย</div>
+      <div class="waveform" id="d-waveform">
+        <div class="wave-bar" id="dw1"></div><div class="wave-bar" id="dw2"></div>
+        <div class="wave-bar" id="dw3"></div><div class="wave-bar" id="dw4"></div>
+        <div class="wave-bar" id="dw5"></div><div class="wave-bar" id="dw6"></div>
+        <div class="wave-bar" id="dw7"></div><div class="wave-bar" id="dw8"></div>
+        <div class="wave-bar" id="dw9"></div>
+      </div>
+      <div class="waiting-hint" id="d-waiting">เปิด besties-ai-system.html เพื่อเริ่มต้นใช้งาน</div>
+
+      <!-- TIMER -->
+      <div class="timer-wrap" id="d-timer-wrap">
+        <div class="timer-ring-container">
+          <svg class="timer-ring-svg" width="120" height="120" viewBox="0 0 120 120">
+            <circle class="timer-ring-bg"   cx="60" cy="60" r="52"/>
+            <circle class="timer-ring-fill" id="d-timer-ring" cx="60" cy="60" r="52"
+              stroke-dasharray="326.7" stroke-dashoffset="0"/>
+          </svg>
+          <div class="timer-center">
+            <div class="timer-num"  id="d-timer-num">5:00</div>
+            <div class="timer-label" id="d-timer-lbl">เวลานำเสนอ</div>
+          </div>
+        </div>
+        <div class="timer-done-text" id="d-timer-done">⏰ หมดเวลา!</div>
+      </div>
+    </div>
+
+    <!-- SCORE -->
+    <div class="score-col" id="d-score-col">
+      <div class="score-card">
+        <div class="badge-result">📊 ANALYSIS RESULT</div>
+        <div class="score-header">
+          <div>
+            <div class="score-team-label">ทีม</div>
+            <div class="score-team-name" id="d-score-team">—</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="score-total-num" id="d-score-total">—</div>
+            <div class="score-total-max">/ 100 คะแนน</div>
+          </div>
+        </div>
+
+        <div class="score-row">
+          <span class="score-row-label">ความคิดสร้างสรรค์</span>
+          <div class="score-bar-wrap"><div class="score-bar-fill" id="d-bar-creativity"></div></div>
+          <span class="score-val" id="d-val-creativity">—</span>
+        </div>
+        <div class="score-row">
+          <span class="score-row-label">ความเป็นไปได้</span>
+          <div class="score-bar-wrap"><div class="score-bar-fill" id="d-bar-feasibility"></div></div>
+          <span class="score-val" id="d-val-feasibility">—</span>
+        </div>
+        <div class="score-row">
+          <span class="score-row-label">ความชัดเจน</span>
+          <div class="score-bar-wrap"><div class="score-bar-fill" id="d-bar-clarity"></div></div>
+          <span class="score-val" id="d-val-clarity">—</span>
+        </div>
+        <div class="score-row">
+          <span class="score-row-label">ผลกระทบ</span>
+          <div class="score-bar-wrap"><div class="score-bar-fill" id="d-bar-impact"></div></div>
+          <span class="score-val" id="d-val-impact">—</span>
+        </div>
+
+        <hr class="score-divider">
+        <div class="score-summary" id="d-summary"></div>
+
+        <div id="d-strengths-wrap" style="margin-top:12px;display:none;">
+          <div class="score-section-label">จุดเด่น</div>
+          <div id="d-strengths"></div>
+        </div>
+        <div id="d-improvements-wrap" style="margin-top:10px;display:none;">
+          <div class="score-section-label">ข้อควรปรับปรุง</div>
+          <div id="d-improvements"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /center-area -->
+
+  <!-- BOTTOM -->
+  <div class="bottom-bar">
+    <div class="status-dot" id="d-dot"></div>
+    <span class="status-text" id="d-status-text">รอการเชื่อมต่อ...</span>
+  </div>
+
+</div><!-- /display-root -->
+
+<script>
+// ── helpers ──────────────────────────────────────────────────
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── DOM refs ─────────────────────────────────────────────────
+const D = {
+  teamName:    document.getElementById('d-team-name'),
+  sessionId:   document.getElementById('d-session-id'),
+  tagline:     document.getElementById('d-tagline'),
+  avatarWrap:  document.getElementById('d-avatar-wrapper'),
+  gesturePop:  document.getElementById('d-gesture-pop'),
+  waveBars:    document.querySelectorAll('#d-waveform .wave-bar'),
+  dot:         document.getElementById('d-dot'),
+  statusText:  document.getElementById('d-status-text'),
+  scoreCol:    document.getElementById('d-score-col'),
+  scoreTeam:   document.getElementById('d-score-team'),
+  scoreTotal:  document.getElementById('d-score-total'),
+  barCreativity:  document.getElementById('d-bar-creativity'),
+  barFeasibility: document.getElementById('d-bar-feasibility'),
+  barClarity:     document.getElementById('d-bar-clarity'),
+  barImpact:      document.getElementById('d-bar-impact'),
+  valCreativity:  document.getElementById('d-val-creativity'),
+  valFeasibility: document.getElementById('d-val-feasibility'),
+  valClarity:     document.getElementById('d-val-clarity'),
+  valImpact:      document.getElementById('d-val-impact'),
+  summary:        document.getElementById('d-summary'),
+  strengthsWrap:  document.getElementById('d-strengths-wrap'),
+  strengths:      document.getElementById('d-strengths'),
+  improvementsWrap: document.getElementById('d-improvements-wrap'),
+  improvements:   document.getElementById('d-improvements'),
+  waiting:        document.getElementById('d-waiting'),
+  timerWrap:  document.getElementById('d-timer-wrap'),
+  timerNum:   document.getElementById('d-timer-num'),
+  timerLbl:   document.getElementById('d-timer-lbl'),
+  timerRing:  document.getElementById('d-timer-ring'),
+  timerDone:  document.getElementById('d-timer-done'),
+};
+
+// ── state handlers ───────────────────────────────────────────
+function clearScore() {
+  D.scoreCol.classList.remove('visible');
+  D.scoreTeam.textContent  = '—';
+  D.scoreTotal.textContent = '—';
+  D.scoreTotal.style.color = '';
+  [D.barCreativity, D.barFeasibility, D.barClarity, D.barImpact].forEach(b => b.style.width = '0%');
+  [D.valCreativity, D.valFeasibility, D.valClarity, D.valImpact].forEach(v => v.textContent = '—');
+  D.summary.textContent = '';
+  D.strengthsWrap.style.display   = 'none';
+  D.improvementsWrap.style.display = 'none';
+  localStorage.removeItem('besties_display_score');
+}
+
+function onReset() {
+  D.teamName.textContent  = 'รอทีม...';
+  D.sessionId.textContent = 'SESSION —';
+  D.tagline.textContent   = 'กรรมการ AI สำหรับการประกวดไอเดีย';
+  D.tagline.classList.remove('active');
+  D.waveBars.forEach(b => b.classList.remove('active'));
+  D.avatarWrap.classList.remove('speaking');
+  D.dot.classList.remove('busy');
+  D.statusText.textContent = 'รอ admin เปิด Besties AI...';
+  D.waiting.style.display  = 'block';
+  D.timerWrap.classList.remove('visible');
+  D.timerDone.style.display = 'none';
+  D.timerRing.style.strokeDashoffset = '0';
+  D.timerRing.style.stroke = '#4CAF50';
+  D.timerNum.style.color = '#fff';
+  clearScore();
+}
+
+function onSession(msg) {
+  D.teamName.textContent  = msg.teamName  || 'ทีม?';
+  D.sessionId.textContent = 'SESSION ' + (msg.sessionId || '—');
+  D.waiting.style.display = 'none';
+  clearScore();
+}
+
+function onAvatar(msg) {
+  const speaking = msg.state === 'speaking';
+  const busy     = msg.state !== 'idle';
+
+  D.waveBars.forEach(b => b.classList.toggle('active', speaking));
+  D.avatarWrap.classList.toggle('speaking', speaking);
+  D.tagline.textContent = msg.tagline || 'กรรมการ AI สำหรับการประกวดไอเดีย';
+  D.tagline.classList.toggle('active', busy);
+  D.dot.classList.toggle('busy', busy);
+  D.statusText.textContent = msg.status || 'พร้อมใช้งาน';
+  D.waiting.style.display = 'none';
+}
+
+function onGesture(msg) {
+  // emoji pop
+  const pop = D.gesturePop;
+  pop.textContent = msg.icon;
+  pop.classList.remove('show');
+  void pop.offsetWidth;
+  pop.classList.add('show');
+  setTimeout(() => pop.classList.remove('show'), 1400);
+
+  // avatar anim
+  const w = D.avatarWrap;
+  if (!w.classList.contains('speaking')) {
+    w.classList.remove('gesture-bounce','gesture-shake','gesture-pulse');
+    void w.offsetWidth;
+    w.classList.add(msg.anim || 'gesture-bounce');
+    setTimeout(() => w.classList.remove('gesture-bounce','gesture-shake','gesture-pulse'), 650);
+  }
+}
+
+function onScore(msg) {
+  const data = msg.data || {};
+  const b    = data.breakdown || {};
+  const score = data.totalScore || 0;
+  const color = score >= 80 ? '#4CAF50' : score >= 60 ? '#F5C400' : '#F97316';
+
+  D.scoreTeam.textContent  = escHtml(data.teamName || '—');
+  D.scoreTotal.textContent = score;
+  D.scoreTotal.style.color = color;
+
+  function setBar(barEl, valEl, val, max) {
+    const pct = Math.round((val / max) * 100);
+    barEl.style.width = '0%';
+    valEl.textContent = `${val}/${max}`;
+    setTimeout(() => { barEl.style.width = pct + '%'; }, 100);
+  }
+  setBar(D.barCreativity,  D.valCreativity,  b.creativity  || 0, 25);
+  setBar(D.barFeasibility, D.valFeasibility, b.feasibility || 0, 25);
+  setBar(D.barClarity,     D.valClarity,     b.clarity     || 0, 25);
+  setBar(D.barImpact,      D.valImpact,      b.impact      || 0, 25);
+
+  D.summary.textContent = data.summary || '';
+
+  const strengths = data.strengths || [];
+  if (strengths.length) {
+    D.strengths.innerHTML = strengths.map(s => `<div class="score-bullet">• ${escHtml(s)}</div>`).join('');
+    D.strengthsWrap.style.display = 'block';
+  } else {
+    D.strengthsWrap.style.display = 'none';
+  }
+
+  const improvements = data.improvements || [];
+  if (improvements.length) {
+    D.improvements.innerHTML = improvements.map(s => `<div class="score-bullet">• ${escHtml(s)}</div>`).join('');
+    D.improvementsWrap.style.display = 'block';
+  } else {
+    D.improvementsWrap.style.display = 'none';
+  }
+
+  // slide in score panel
+  setTimeout(() => D.scoreCol.classList.add('visible'), 200);
+}
+
+// ── Timer ─────────────────────────────────────────────────────
+const CIRC = 2 * Math.PI * 52; // r=52
+
+function onTimer(msg) {
+  const { remaining, total, running, done } = msg;
+  const m = Math.floor(remaining / 60), s = remaining % 60;
+  D.timerNum.textContent = `${m}:${String(s).padStart(2,'0')}`;
+
+  // ring progress
+  const pct = total > 0 ? remaining / total : 0;
+  D.timerRing.style.strokeDashoffset = CIRC * (1 - pct);
+
+  // color states
+  const warn   = remaining <= total * 0.25 && remaining > 30;
+  const danger = remaining <= 30;
+  const color  = done || danger ? '#DC2626' : warn ? '#E85C0D' : '#4CAF50';
+  D.timerRing.style.stroke = color;
+  D.timerNum.style.color   = done || danger ? '#DC2626' : warn ? '#E85C0D' : '#fff';
+
+  // done state
+  D.timerDone.style.display = done ? 'block' : 'none';
+  D.timerLbl.textContent    = done ? '' : running ? 'กำลังนับถอยหลัง' : 'เวลานำเสนอ';
+
+  // show timer wrap
+  D.timerWrap.classList.add('visible');
+}
+
+// ── BroadcastChannel listener ─────────────────────────────────
+try {
+  const ch = new BroadcastChannel('besties-display');
+  ch.onmessage = (e) => {
+    const msg = e.data;
+    if (!msg) return;
+    if (msg.type === 'reset')   onReset();
+    if (msg.type === 'session') onSession(msg);
+    if (msg.type === 'avatar')  onAvatar(msg);
+    if (msg.type === 'gesture') onGesture(msg);
+    if (msg.type === 'score')   onScore(msg);
+    if (msg.type === 'timer')   onTimer(msg);
+  };
+  D.statusText.textContent = 'รอ admin เปิด Besties AI...';
+} catch(e) {
+  D.statusText.textContent = 'BroadcastChannel ไม่รองรับ — ใช้ผ่าน web server';
+}
+
+// ── restore last known state from localStorage ───────────────
+(function restoreState() {
+  try {
+    const sess = localStorage.getItem('besties_display_session');
+    if (sess) onSession(JSON.parse(sess));
+    const score = localStorage.getItem('besties_display_score');
+    if (score) onScore(JSON.parse(score));
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>
