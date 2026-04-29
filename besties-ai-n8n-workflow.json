@@ -107,7 +107,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const queryData = $input.first()?.json?.query || {};\nconst sessionFilter = queryData.session || '';\nconst limitParam = parseInt(queryData.limit || '20', 10);\n\nconst rows = $input.all().map(r => r.json);\n\nconst filtered = sessionFilter\n  ? rows.filter(r => r['Session ID'] === sessionFilter)\n  : rows;\n\nconst sttOnly = filtered\n  .filter(r => r['Type'] === 'stt')\n  .slice(-limitParam);\n\nconst contextText = sttOnly\n  .map(r => r['Text'])\n  .join('\\n');\n\nreturn [{\n  json: {\n    ok: true,\n    count: filtered.length,\n    sttCount: sttOnly.length,\n    session: sessionFilter || 'all',\n    contextText,\n    kb: filtered.map(r => ({\n      ts:      r['Timestamp'],\n      session: r['Session ID'],\n      type:    r['Type'],\n      text:    r['Text']\n    }))\n  }\n}];"
+        "jsCode": "const queryData = $input.first()?.json?.query || {};\nconst sessionFilter = queryData.session || '';\nconst limitParam = parseInt(queryData.limit || '20', 10);\n\nconst rows = $input.all().map(r => r.json);\n\nconst filtered = sessionFilter\n  ? rows.filter(r => r['Session ID'] === sessionFilter)\n  : rows;\n\n// ข้อมูลโครงการล่วงหน้า (project_brief / workshop)\nconst briefRows = filtered.filter(r =>\n  r['Type'] === 'project_brief' || r['Type'] === 'workshop'\n);\nconst briefText = briefRows.map(r => r['Text']).join('\\n');\n\n// การนำเสนอสด\nconst sttOnly = filtered\n  .filter(r => r['Type'] === 'stt')\n  .slice(-limitParam);\nconst sttText = sttOnly.map(r => r['Text']).join('\\n');\n\nconst contextText =\n  (briefText ? '[ข้อมูลโครงการล่วงหน้า]\\n' + briefText + '\\n\\n' : '') +\n  (sttText  ? '[การนำเสนอสด]\\n' + sttText : '');\n\nreturn [{\n  json: {\n    ok: true,\n    count: filtered.length,\n    sttCount: sttOnly.length,\n    briefCount: briefRows.length,\n    session: sessionFilter || 'all',\n    contextText,\n    kb: filtered.map(r => ({\n      ts:      r['Timestamp'],\n      session: r['Session ID'],\n      type:    r['Type'],\n      text:    r['Text']\n    }))\n  }\n}];"
       },
       "id": "node-0007",
       "name": "Build Context",
@@ -256,6 +256,73 @@
     },
     {
       "parameters": {
+        "httpMethod": "POST",
+        "path": "besties-jury",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-0020",
+      "name": "Webhook: Save Jury Score",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 1460]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1dd45yr9_ceioBxb6E6mQ-XQydVug77V4Ti5fFvdCB1o",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Jury Scores",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Session ID":        "={{ $json.body.session }}",
+            "Judge Name":        "={{ $json.body.judgeName }}",
+            "Business Impact":   "={{ $json.body.businessImpact }}",
+            "AI Fit":            "={{ $json.body.aiFit }}",
+            "Data Feasibility":  "={{ $json.body.dataFeasibility }}",
+            "Workflow Adoption": "={{ $json.body.workflowAdoption }}",
+            "Risk Scalability":  "={{ $json.body.riskScalability }}",
+            "Comment":           "={{ $json.body.comment }}",
+            "Submitted At":      "={{ new Date().toISOString() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "node-0021",
+      "name": "Sheets: Append Jury Score",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [480, 1460],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, session: $('Webhook: Save Jury Score').first().json.body.session, judgeName: $('Webhook: Save Jury Score').first().json.body.judgeName }) }}",
+        "options": { "responseCode": 200 }
+      },
+      "id": "node-0022",
+      "name": "Respond: Jury Saved",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [720, 1460]
+    },
+
+    {
+      "parameters": {
         "httpMethod": "GET",
         "path": "besties-jury",
         "responseMode": "responseNode",
@@ -376,6 +443,16 @@
     "Format Sessions": {
       "main": [
         [{ "node": "Respond: Sessions List", "type": "main", "index": 0 }]
+      ]
+    },
+    "Webhook: Save Jury Score": {
+      "main": [
+        [{ "node": "Sheets: Append Jury Score", "type": "main", "index": 0 }]
+      ]
+    },
+    "Sheets: Append Jury Score": {
+      "main": [
+        [{ "node": "Respond: Jury Saved", "type": "main", "index": 0 }]
       ]
     },
     "Webhook: Jury Scores": {

@@ -1523,6 +1523,26 @@
           </div>
         </div>
 
+        <!-- PROJECT BRIEF -->
+        <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+            <div class="kb-title" style="margin-bottom:0;">📄 Project Brief (ข้อมูลล่วงหน้า)</div>
+            <button class="btn-sm" onclick="clearBrief()" title="ล้างข้อมูล">✕</button>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.6;">
+            วาง Project Brief / ข้อมูล Workshop ของทีมนี้ก่อนเริ่ม — Besties จะใช้เป็น context ในการตั้งคำถาม
+          </div>
+          <textarea id="project-brief-input" rows="6"
+            style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;font-family:'Sarabun',sans-serif;color:var(--text);resize:vertical;line-height:1.6;outline:none;"
+            placeholder="วาง Project Brief, ข้อมูล Use Case, หรือสรุป Workshop ที่ทีมส่งมาล่วงหน้าได้เลยครับ..."
+            onfocus="this.style.borderColor='var(--green)'"
+            onblur="this.style.borderColor='var(--border)'"></textarea>
+          <button class="btn-sm primary" style="width:100%;margin-top:8px;padding:9px;" onclick="saveProjectBrief()">
+            💾 บันทึก Brief ลง KB
+          </button>
+          <div id="brief-status" style="font-size:11px;color:var(--text3);margin-top:6px;text-align:center;min-height:16px;"></div>
+        </div>
+
         <!-- PROMPT EDITOR -->
         <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
@@ -1888,9 +1908,18 @@
     // PROCESS INPUT → GEMINI → TTS
     // ============================================================
     async function processInput(text) {
+      const mode = document.getElementById('mode-select').value;
       addMsg('user', text);
-      saveKB(text);
-      sendN8N({ type: 'stt', text, session: CFG.sessionId, ts: new Date().toISOString() });
+
+      if (mode === 'qa') {
+        // ช่วงซักถาม — บันทึกเป็น qa_answer แยกจาก pitch STT ไม่ปนกัน
+        sendN8N({ type: 'qa_answer', text, session: CFG.sessionId, ts: new Date().toISOString() });
+      } else {
+        // ช่วง Pitch / Analyze — บันทึกลง KB ตามปกติ
+        saveKB(text);
+        sendN8N({ type: 'stt', text, session: CFG.sessionId, ts: new Date().toISOString() });
+      }
+
       await geminiChat(text);
     }
 
@@ -1971,6 +2000,14 @@
 
         addMsg('ai', reply);
         sendN8N({ type: 'ai_response', text: reply, session: CFG.sessionId });
+
+        // Model B — broadcast คำถามไปยัง display screen
+        if (mode === 'qa') {
+          dispBroadcast({ type: 'question', text: reply });
+        } else {
+          dispBroadcast({ type: 'question_clear' });
+        }
+
         await speakText(reply, key);
 
       } catch (err) {
@@ -2240,6 +2277,7 @@
       const base = getN8NBase();
       if (!base) return;
       try {
+        // n8n webhook รับ HTTP body แล้ว expose เป็น $json.body.X อัตโนมัติ — ส่ง flat ตรงๆ
         await fetch(`${base}/besties-kb`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       } catch (e) { console.warn('N8N save:', e); }
     }
@@ -2254,6 +2292,29 @@
           body: JSON.stringify({ session: sessionId, teamName })
         });
       } catch (e) { console.warn('registerSession:', e); }
+    }
+
+    async function saveProjectBrief() {
+      const text = document.getElementById('project-brief-input').value.trim();
+      if (!text) { showToast('⚠️', 'กรุณาใส่ข้อมูล Project Brief ก่อน'); return; }
+      const statusEl = document.getElementById('brief-status');
+      statusEl.textContent = 'กำลังบันทึก...';
+      try {
+        await sendN8N({ type: 'project_brief', text, session: CFG.sessionId, ts: new Date().toISOString() });
+        // บันทึกลง local KB ด้วยเพื่อให้ใช้ได้แม้ไม่มี n8n
+        ST.kb.unshift({ text: '[Project Brief]\n' + text, contestant: 'brief', ts: new Date().toISOString(), tags: [] });
+        renderKB();
+        statusEl.textContent = '✅ บันทึกแล้ว — Besties จะใช้ข้อมูลนี้ในการตั้งคำถาม';
+        showToast('✅', 'บันทึก Project Brief สำเร็จ');
+      } catch (e) {
+        statusEl.textContent = '❌ บันทึกไม่สำเร็จ';
+        showToast('❌', 'บันทึกไม่สำเร็จ: ' + e.message);
+      }
+    }
+
+    function clearBrief() {
+      document.getElementById('project-brief-input').value = '';
+      document.getElementById('brief-status').textContent = '';
     }
 
     async function listSessions() {
@@ -2708,6 +2769,11 @@
     window.addEventListener('load', () => {
       const k = localStorage.getItem('gemini_key');
       if (k) CFG.geminiKey = k;
+
+      // เมื่อสลับ mode ออกจาก Q&A ให้ซ่อนคำถามบน display screen
+      document.getElementById('mode-select').addEventListener('change', (e) => {
+        if (e.target.value !== 'qa') dispBroadcast({ type: 'question_clear' });
+      });
 
       // ล้างข้อมูล display เก่าออกจาก localStorage แล้วบอก display ให้ reset
       localStorage.removeItem('besties_display_session');

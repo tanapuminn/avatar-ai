@@ -229,6 +229,49 @@
     margin-bottom: 1rem;
   }
 
+  /* ── QUESTION COLUMN (Model B) ── */
+  .question-col {
+    position: absolute; right: 0; top: 50%; transform: translateY(-50%) translateX(40px);
+    width: 380px;
+    opacity: 0;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .question-col.visible {
+    opacity: 1; transform: translateY(-50%) translateX(0); pointer-events: auto;
+  }
+  .question-card {
+    background: rgba(245,196,0,0.06);
+    border: 1px solid rgba(245,196,0,0.35);
+    border-radius: 20px; padding: 1.8rem;
+  }
+  .question-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(245,196,0,0.15); border: 1px solid rgba(245,196,0,0.4);
+    color: var(--yellow); font-size: 10px; font-weight: 700;
+    padding: 3px 12px; border-radius: 20px; letter-spacing: 0.5px;
+    margin-bottom: 1.2rem; text-transform: uppercase;
+  }
+  .question-badge::before { content: ''; display: inline-block; width: 6px; height: 6px; background: var(--yellow); border-radius: 50%; animation: blink 1.2s ease infinite; }
+  .question-label {
+    font-size: 11px; color: rgba(255,255,255,0.35); font-weight: 600;
+    letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 0.8rem;
+  }
+  .question-text {
+    font-size: 20px; font-weight: 600; line-height: 1.65;
+    color: #fff; letter-spacing: -0.2px;
+  }
+  .question-hint {
+    margin-top: 1.2rem;
+    font-size: 12px; color: rgba(255,255,255,0.3); font-style: italic;
+  }
+  @keyframes question-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .question-text.animate { animation: question-in 0.4s ease forwards; }
+
   /* ── BOTTOM STATUS BAR ── */
   .bottom-bar {
     display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -319,6 +362,16 @@
           </div>
         </div>
         <div class="timer-done-text" id="d-timer-done">⏰ หมดเวลา!</div>
+      </div>
+    </div>
+
+    <!-- QUESTION (Model B) -->
+    <div class="question-col" id="d-question-col">
+      <div class="question-card">
+        <div class="question-badge">AI Bestie ถาม</div>
+        <div class="question-label">คำถามสำหรับทีม</div>
+        <div class="question-text" id="d-question-text"></div>
+        <div class="question-hint">ตอบคำถามนี้ภายในเวลาที่กำหนด</div>
       </div>
     </div>
 
@@ -415,6 +468,8 @@ const D = {
   improvementsWrap: document.getElementById('d-improvements-wrap'),
   improvements:   document.getElementById('d-improvements'),
   waiting:        document.getElementById('d-waiting'),
+  questionCol:    document.getElementById('d-question-col'),
+  questionText:   document.getElementById('d-question-text'),
   timerWrap:  document.getElementById('d-timer-wrap'),
   timerNum:   document.getElementById('d-timer-num'),
   timerLbl:   document.getElementById('d-timer-lbl'),
@@ -451,6 +506,7 @@ function onReset() {
   D.timerRing.style.strokeDashoffset = '0';
   D.timerRing.style.stroke = '#4CAF50';
   D.timerNum.style.color = '#fff';
+  onQuestionClear();
   clearScore();
 }
 
@@ -458,6 +514,7 @@ function onSession(msg) {
   D.teamName.textContent  = msg.teamName  || 'ทีม?';
   D.sessionId.textContent = 'SESSION ' + (msg.sessionId || '—');
   D.waiting.style.display = 'none';
+  onQuestionClear();
   clearScore();
 }
 
@@ -532,8 +589,30 @@ function onScore(msg) {
     D.improvementsWrap.style.display = 'none';
   }
 
-  // slide in score panel
+  // hide question panel then slide in score panel
+  onQuestionClear();
   setTimeout(() => D.scoreCol.classList.add('visible'), 200);
+}
+
+// ── Question (Model B) ───────────────────────────────────────
+function onQuestion(msg) {
+  const text = msg.text || '';
+  if (!text) return;
+
+  // ซ่อน score panel ก่อน (ไม่ควรแสดงพร้อมกัน)
+  D.scoreCol.classList.remove('visible');
+
+  D.questionText.textContent = text;
+  D.questionText.classList.remove('animate');
+  void D.questionText.offsetWidth; // reflow trigger
+  D.questionText.classList.add('animate');
+
+  D.questionCol.classList.add('visible');
+  D.waiting.style.display = 'none';
+}
+
+function onQuestionClear() {
+  D.questionCol.classList.remove('visible');
 }
 
 // ── Timer ─────────────────────────────────────────────────────
@@ -569,12 +648,14 @@ try {
   ch.onmessage = (e) => {
     const msg = e.data;
     if (!msg) return;
-    if (msg.type === 'reset')   onReset();
-    if (msg.type === 'session') onSession(msg);
-    if (msg.type === 'avatar')  onAvatar(msg);
-    if (msg.type === 'gesture') onGesture(msg);
-    if (msg.type === 'score')   onScore(msg);
-    if (msg.type === 'timer')   onTimer(msg);
+    if (msg.type === 'reset')          onReset();
+    if (msg.type === 'session')        onSession(msg);
+    if (msg.type === 'avatar')         onAvatar(msg);
+    if (msg.type === 'gesture')        onGesture(msg);
+    if (msg.type === 'score')          onScore(msg);
+    if (msg.type === 'timer')          onTimer(msg);
+    if (msg.type === 'question')       onQuestion(msg);
+    if (msg.type === 'question_clear') onQuestionClear();
   };
   D.statusText.textContent = 'รอ admin เปิด Besties AI...';
 } catch(e) {
