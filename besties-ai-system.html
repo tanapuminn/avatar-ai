@@ -1,887 +1,2194 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Besties AI — ระบบประกวดไอเดีย</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --yellow: #F5C400;
-    --yellow-light: #FFF8D6;
-    --yellow-dark: #C49A00;
-    --green: #2D7A3A;
-    --green-light: #E8F5EA;
-    --orange: #E85C0D;
-    --bg: #F5F2EC;
-    --surface: #FFFFFF;
-    --surface2: #F0EDE6;
-    --text: #1A1A1A;
-    --text2: #5A5550;
-    --text3: #9A9490;
-    --border: rgba(0,0,0,0.08);
-    --border2: rgba(0,0,0,0.14);
-    --radius: 16px;
-    --radius-sm: 10px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Sarabun', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Besties AI — ระบบประกวดไอเดีย</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --yellow: #F5C400;
+      --yellow-light: #FFF8D6;
+      --yellow-dark: #C49A00;
+      --green: #2D7A3A;
+      --green-light: #E8F5EA;
+      --orange: #E85C0D;
+      --bg: #F5F2EC;
+      --surface: #FFFFFF;
+      --surface2: #F0EDE6;
+      --text: #1A1A1A;
+      --text2: #5A5550;
+      --text3: #9A9490;
+      --border: rgba(0, 0, 0, 0.08);
+      --border2: rgba(0, 0, 0, 0.14);
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
 
-  /* HEADER */
-  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-  .header-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; letter-spacing: -0.3px; }
-  .brand-dot { width: 10px; height: 10px; background: var(--yellow); border-radius: 50%; display: inline-block; }
-  .header-session { display: flex; align-items: center; gap: 12px; }
-  .session-badge { background: var(--green-light); color: var(--green); font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
-  .session-id { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text3); }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  /* LAYOUT */
-  .main { display: grid; grid-template-columns: 420px 1fr; gap: 0; height: calc(100vh - 60px); }
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-  /* AVATAR PANEL */
-  .avatar-panel { background: linear-gradient(170deg, #1A2A1E 0%, #0F1A12 100%); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 2rem 1.5rem; position: relative; overflow: hidden; }
-  .avatar-bg-rings { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -60%); pointer-events: none; }
-  .ring { position: absolute; border-radius: 50%; border: 1px solid rgba(245,196,0,0.12); top: 50%; left: 50%; transform: translate(-50%, -50%); }
-  .ring-1 { width: 220px; height: 220px; }
-  .ring-2 { width: 300px; height: 300px; border-color: rgba(245,196,0,0.08); }
-  .ring-3 { width: 380px; height: 380px; border-color: rgba(245,196,0,0.05); }
-  .avatar-top { width: 100%; display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 2; }
-  .avatar-label { background: rgba(245,196,0,0.15); border: 1px solid rgba(245,196,0,0.3); color: var(--yellow); font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 20px; letter-spacing: 0.8px; text-transform: uppercase; }
-  .avatar-status { display: flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.5); font-size: 12px; }
-  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #4CAF50; animation: pulse-green 2s infinite; }
-  @keyframes pulse-green { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.6;transform:scale(0.85);} }
+    /* HEADER */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
 
-  .avatar-container { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; }
-  .avatar-glow { position: absolute; width: 200px; height: 200px; background: radial-gradient(circle, rgba(245,196,0,0.15) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none; }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: -0.3px;
+    }
 
-  .avatar-img-wrapper { width: 240px; height: 240px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(245,196,0,0.3); position: relative; background: rgba(255,255,255,0.04); }
-  .avatar-img-wrapper img { width: 100%; height: 100%; object-fit: cover; object-position: center 10%; display: block; position: relative; z-index: 1; }
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--yellow);
+      border-radius: 50%;
+      display: inline-block;
+    }
 
-  /* Speaking ring pulse on avatar */
-  .avatar-img-wrapper.speaking {
-    border-color: var(--yellow);
-    animation: ring-pulse 0.7s ease-in-out infinite alternate;
-  }
-  @keyframes ring-pulse {
-    from { box-shadow: 0 0 0 0 rgba(245,196,0,0.4); border-color: rgba(245,196,0,0.6); }
-    to   { box-shadow: 0 0 0 12px rgba(245,196,0,0); border-color: var(--yellow); }
-  }
+    .header-session {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-  .avatar-fallback { display: none; width: 100%; height: 100%; background: linear-gradient(135deg,#1A2A1E,#0F1A12); align-items: center; justify-content: center; flex-direction: column; gap: 8px; }
+    .session-badge {
+      background: var(--green-light);
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
 
-  .avatar-name { color: #fff; font-size: 20px; font-weight: 700; margin-top: 1rem; letter-spacing: -0.3px; }
-  .avatar-tagline { color: rgba(255,255,255,0.4); font-size: 13px; margin-top: 4px; }
+    .session-id {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      color: var(--text3);
+    }
 
-  /* WAVEFORM */
-  .waveform { display: flex; align-items: center; gap: 4px; height: 32px; margin-top: 12px; }
-  .wave-bar { width: 4px; background: rgba(245,196,0,0.25); border-radius: 4px; height: 6px; }
-  .wave-bar.active { background: var(--yellow); animation: wave-anim 0.6s ease-in-out infinite alternate; }
-  .wave-bar:nth-child(1){animation-delay:0s} .wave-bar:nth-child(2){animation-delay:0.08s} .wave-bar:nth-child(3){animation-delay:0.16s}
-  .wave-bar:nth-child(4){animation-delay:0.24s} .wave-bar:nth-child(5){animation-delay:0.16s} .wave-bar:nth-child(6){animation-delay:0.08s}
-  .wave-bar:nth-child(7){animation-delay:0s} .wave-bar:nth-child(8){animation-delay:0.08s} .wave-bar:nth-child(9){animation-delay:0.16s}
-  @keyframes wave-anim { from{height:6px} to{height:28px} }
+    /* LAYOUT */
+    .main {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 0;
+      height: calc(100vh - 60px);
+    }
 
-  /* GESTURE */
-  .gesture-panel { width: 100%; position: relative; z-index: 2; }
-  .gesture-label { color: rgba(255,255,255,0.3); font-size: 11px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 10px; text-align: center; }
-  .gesture-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-  .gesture-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 8px 4px; color: rgba(255,255,255,0.7); font-size: 11px; font-family: 'Sarabun', sans-serif; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-  .gesture-btn:hover { background: rgba(245,196,0,0.15); border-color: rgba(245,196,0,0.4); color: var(--yellow); transform: translateY(-1px); }
-  .gesture-btn.triggered { background: rgba(245,196,0,0.25); border-color: var(--yellow); color: var(--yellow); transform: scale(0.96); }
-  .gesture-icon { font-size: 18px; }
+    /* AVATAR PANEL */
+    .avatar-panel {
+      background: linear-gradient(170deg, #1A2A1E 0%, #0F1A12 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
 
-  /* Gesture emoji overlay on avatar */
-  .avatar-gesture-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: flex; align-items: center; justify-content: center; }
-  .gesture-emoji-pop { font-size: 72px; line-height: 1; opacity: 0; transform: scale(0.3) translateY(10px); transition: none; }
-  .gesture-emoji-pop.show { animation: gesture-pop 1.2s ease forwards; }
-  @keyframes gesture-pop {
-    0%   { opacity: 0; transform: scale(0.3) translateY(10px); }
-    20%  { opacity: 1; transform: scale(1.15) translateY(-5px); }
-    50%  { opacity: 1; transform: scale(1) translateY(0); }
-    80%  { opacity: 1; transform: scale(1) translateY(0); }
-    100% { opacity: 0; transform: scale(0.8) translateY(-20px); }
-  }
+    .avatar-bg-rings {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -60%);
+      pointer-events: none;
+    }
 
-  /* Avatar bounce/shake animations */
-  .avatar-img-wrapper.gesture-bounce { animation: avatar-bounce 0.5s ease !important; }
-  .avatar-img-wrapper.gesture-shake  { animation: avatar-shake 0.5s ease !important; }
-  .avatar-img-wrapper.gesture-pulse  { animation: avatar-pulse 0.6s ease !important; }
-  @keyframes avatar-bounce {
-    0%,100% { transform: translateY(0); }
-    30% { transform: translateY(-12px); }
-    60% { transform: translateY(-5px); }
-  }
-  @keyframes avatar-shake {
-    0%,100% { transform: rotate(0deg); }
-    20% { transform: rotate(-6deg); }
-    40% { transform: rotate(6deg); }
-    60% { transform: rotate(-4deg); }
-    80% { transform: rotate(4deg); }
-  }
-  @keyframes avatar-pulse {
-    0%,100% { transform: scale(1); }
-    40% { transform: scale(1.08); }
-    70% { transform: scale(0.96); }
-  }
+    .ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(245, 196, 0, 0.12);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
 
-  /* RIGHT PANEL */
-  .right-panel { display: grid; grid-template-rows: 1fr auto; overflow: hidden; }
-  .transcript-area { overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .ring-1 {
+      width: 220px;
+      height: 220px;
+    }
 
-  .session-header { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius) var(--radius) 0 0; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; border-bottom: none; }
-  .session-info h2 { font-size: 15px; font-weight: 600; }
-  .session-info p { font-size: 12px; color: var(--text3); margin-top: 2px; }
-  .session-actions { display: flex; gap: 8px; }
+    .ring-2 {
+      width: 300px;
+      height: 300px;
+      border-color: rgba(245, 196, 0, 0.08);
+    }
 
-  /* TIMER BAR */
-  .timer-bar { background: var(--surface); border: 1px solid var(--border); border-radius: 0 0 var(--radius) var(--radius); padding: 8px 1.25rem; display: flex; align-items: center; gap: 10px; margin-bottom: 0; }
-  .timer-display { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; min-width: 64px; color: var(--green); transition: color 0.5s; letter-spacing: 1px; }
-  .timer-display.warn   { color: #E85C0D; }
-  .timer-display.danger { color: #DC2626; animation: timer-flash 0.5s ease-in-out infinite alternate; }
-  @keyframes timer-flash { from { opacity: 1; } to { opacity: 0.4; } }
-  .timer-progress-wrap { flex: 1; height: 5px; background: rgba(0,0,0,0.08); border-radius: 3px; overflow: hidden; }
-  .timer-progress-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width 1s linear, background 0.5s; }
-  .timer-preset { width: 68px; padding: 5px 6px; border-radius: 7px; border: 1px solid var(--border2); background: var(--surface2); font-family: 'Sarabun', sans-serif; font-size: 12px; color: var(--text); cursor: pointer; }
-  .timer-btn { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border2); background: var(--surface2); font-size: 14px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
-  .timer-btn:hover { background: var(--yellow-light); border-color: var(--yellow); }
-  .timer-btn.active { background: var(--yellow); border-color: var(--yellow-dark); }
+    .ring-3 {
+      width: 380px;
+      height: 380px;
+      border-color: rgba(245, 196, 0, 0.05);
+    }
 
-  .btn-sm { background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-family: 'Sarabun', sans-serif; color: var(--text2); cursor: pointer; transition: all 0.2s; font-weight: 500; }
-  .btn-sm:hover { background: var(--yellow-light); border-color: var(--yellow); color: var(--yellow-dark); }
-  .btn-sm.primary { background: var(--yellow); border-color: var(--yellow-dark); color: #1A1A1A; font-weight: 600; }
-  .btn-sm.primary:hover { background: var(--yellow-dark); color: #fff; }
+    .avatar-top {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      position: relative;
+      z-index: 2;
+    }
 
-  /* STT */
-  .stt-live-box { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; min-height: 72px; display: flex; flex-direction: column; gap: 8px; transition: border-color 0.3s; }
-  .stt-live-box.listening { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(232,92,13,0.1); }
-  .stt-live-box.processing { border-color: var(--yellow); box-shadow: 0 0 0 3px rgba(245,196,0,0.12); }
-  .stt-header { display: flex; align-items: center; justify-content: space-between; }
-  .stt-indicator { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; color: var(--text3); }
-  .stt-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text3); }
-  .stt-dot.listening { background: var(--orange); animation: pulse-red 1s infinite; }
-  .stt-dot.processing { background: var(--yellow-dark); animation: pulse-yellow 0.8s infinite; }
-  @keyframes pulse-red { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.3);opacity:0.7;} }
-  @keyframes pulse-yellow { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
-  .stt-live-text { font-size: 15px; color: var(--text); line-height: 1.6; min-height: 24px; }
-  .stt-live-text .cursor { display: inline-block; width: 2px; height: 16px; background: var(--orange); margin-left: 2px; vertical-align: middle; animation: blink 0.8s steps(2) infinite; }
-  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+    .avatar-label {
+      background: rgba(245, 196, 0, 0.15);
+      border: 1px solid rgba(245, 196, 0, 0.3);
+      color: var(--yellow);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
 
-  /* MESSAGES */
-  .messages-list { display: flex; flex-direction: column; gap: 12px; }
-  .msg { display: flex; gap: 10px; align-items: flex-start; }
-  .msg.user { flex-direction: row-reverse; }
-  .msg-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
-  .msg-avatar.ai { background: #1A2A1E; border: 1.5px solid rgba(245,196,0,0.4); overflow: hidden; }
-  .msg-avatar.ai img { width: 100%; height: 100%; object-fit: cover; object-position: center 15%; }
-  .msg-avatar.user { background: var(--yellow-light); color: var(--yellow-dark); border: 1.5px solid rgba(245,196,0,0.3); font-size: 13px; }
-  .msg-bubble { max-width: 75%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
-  .msg.ai .msg-bubble { background: var(--surface); border: 1px solid var(--border); border-top-left-radius: 4px; }
-  .msg.user .msg-bubble { background: #1A2A1E; color: rgba(255,255,255,0.92); border-top-right-radius: 4px; }
-  .msg-time { font-size: 11px; color: var(--text3); margin-top: 4px; }
-  .msg.ai .msg-time { text-align: left; margin-left: 42px; }
-  .msg.user .msg-time { text-align: right; }
-  .kb-tag { display: inline-flex; align-items: center; gap: 4px; background: var(--green-light); color: var(--green); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; margin-top: 6px; margin-right: 4px; }
-  .kb-tag-dot { width: 5px; height: 5px; background: var(--green); border-radius: 50%; }
+    .avatar-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 12px;
+    }
 
-  /* CONTROLS */
-  .controls-panel { background: var(--surface); border-top: 1px solid var(--border); padding: 1rem 1.5rem; }
-  .controls-top { display: flex; gap: 10px; margin-bottom: 12px; }
-  .config-select { background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 7px 12px; font-size: 13px; font-family: 'Sarabun', sans-serif; color: var(--text); flex: 1; cursor: pointer; outline: none; }
-  .controls-main { display: flex; align-items: center; gap: 12px; }
-  .mic-btn { width: 56px; height: 56px; border-radius: 50%; background: var(--surface2); border: 2px solid var(--border2); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.25s; flex-shrink: 0; color: var(--text2); }
-  .mic-btn:hover { border-color: var(--orange); color: var(--orange); }
-  .mic-btn.listening { background: var(--orange); border-color: var(--orange); color: white; animation: mic-pulse 1.5s infinite; }
-  @keyframes mic-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(232,92,13,0.4);} 50%{box-shadow:0 0 0 12px rgba(232,92,13,0);} }
-  .text-input-wrap { flex: 1; position: relative; }
-  .text-input { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 28px; padding: 12px 50px 12px 18px; font-size: 14px; font-family: 'Sarabun', sans-serif; color: var(--text); outline: none; resize: none; height: 48px; transition: border-color 0.2s; }
-  .text-input:focus { border-color: var(--yellow); }
-  .text-input::placeholder { color: var(--text3); }
-  .send-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; background: var(--yellow); border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: #1A1A1A; }
-  .send-btn:hover { background: var(--yellow-dark); color: white; transform: translateY(-50%) scale(1.05); }
-  .action-btns { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
-  .action-btn { width: 80px; padding: 6px 0; border-radius: 8px; border: 1px solid var(--border2); background: var(--surface2); font-size: 11px; font-family: 'Sarabun', sans-serif; color: var(--text2); font-weight: 600; cursor: pointer; transition: all 0.2s; }
-  .action-btn:hover { background: var(--yellow-light); border-color: var(--yellow); color: var(--yellow-dark); }
-  .action-btn.danger:hover { background: #FEE2E2; border-color: #EF4444; color: #DC2626; }
-  .action-btn.stop { display: none; border-color: #EF4444; background: #FEF2F2; color: #DC2626; animation: stop-pulse 1s ease-in-out infinite alternate; }
-  .action-btn.stop.active { display: block; }
-  @keyframes stop-pulse { from { box-shadow: none; } to { box-shadow: 0 0 0 3px rgba(239,68,68,0.2); } }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #4CAF50;
+      animation: pulse-green 2s infinite;
+    }
 
-  /* KB SIDEBAR */
-  .kb-panel { background: var(--surface); border-left: 1px solid var(--border); width: 300px; padding: 1.25rem; overflow-y: auto; position: absolute; right: 0; top: 0; bottom: 0; transform: translateX(100%); transition: transform 0.3s ease; z-index: 50; }
-  .kb-panel.open { transform: translateX(0); }
-  .kb-title { font-size: 13px; font-weight: 700; color: var(--text); letter-spacing: 0.5px; margin-bottom: 1rem; text-transform: uppercase; }
-  .kb-entry { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
-  .kb-entry-user { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
-  .kb-entry-text { font-size: 13px; color: var(--text); line-height: 1.5; }
-  .kb-entry-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
-  .kb-chip { background: var(--yellow-light); color: var(--yellow-dark); font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; }
-  .field-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; margin-top: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-  .field-input { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 8px 12px; font-size: 12px; font-family: 'Sarabun', sans-serif; color: var(--text); outline: none; height: 36px; }
-  .field-input:focus { border-color: var(--yellow); }
+    @keyframes pulse-green {
 
-  /* TOAST */
-  .toast { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); background: #1A2A1E; border: 1px solid rgba(245,196,0,0.2); border-radius: 10px; padding: 8px 16px; display: flex; align-items: center; gap: 10px; font-size: 12px; color: rgba(255,255,255,0.8); z-index: 200; pointer-events: none; opacity: 0; transition: opacity 0.3s; white-space: nowrap; }
-  .toast.show { opacity: 1; }
-  .toast-icon { color: var(--yellow); font-weight: 700; font-size: 13px; }
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
 
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
-  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      50% {
+        opacity: 0.6;
+        transform: scale(0.85);
+      }
+    }
 
-  /* SESSION OVERLAY */
-  .session-overlay { position:fixed; inset:0; background:rgba(15,26,18,0.75); z-index:300; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.25s; backdrop-filter:blur(4px); }
-  .session-overlay.show { opacity:1; pointer-events:all; }
-  .session-modal { background:var(--surface); border-radius:var(--radius); padding:2rem; width:380px; box-shadow:0 24px 60px rgba(0,0,0,0.3); border:1px solid var(--border); }
-  .session-modal-title { font-size:16px; font-weight:700; margin-bottom:0.35rem; display:flex; align-items:center; gap:8px; }
+    .avatar-container {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-  /* SCORE CARD */
-  .score-card { background:linear-gradient(145deg,#1A2A1E,#0F1A12); border-radius:12px; padding:1.25rem; color:white; }
-  .score-total { font-size:40px; font-weight:700; line-height:1; }
-  .score-label { font-size:10px; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.5px; margin-top:2px; }
-  .score-row { display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.06); font-size:12px; }
-  .score-row:last-child { border-bottom:none; }
-  .score-bar-wrap { flex:1; margin:0 10px; height:4px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden; }
-  .score-bar-fill { height:100%; background:var(--yellow); border-radius:4px; }
-  .score-val { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--yellow); min-width:36px; text-align:right; }
+    .avatar-glow {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(245, 196, 0, 0.15) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
 
-  /* SESSIONS LIST */
-  .session-item { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:10px 12px; margin-bottom:6px; cursor:pointer; transition:all 0.2s; }
-  .session-item:hover { border-color:var(--yellow); background:var(--yellow-light); }
-  .session-item.active { border-color:var(--green); background:var(--green-light); }
-</style>
+    .avatar-img-wrapper {
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid rgba(245, 196, 0, 0.3);
+      position: relative;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .avatar-img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 10%;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Speaking ring pulse on avatar */
+    .avatar-img-wrapper.speaking {
+      border-color: var(--yellow);
+      animation: ring-pulse 0.7s ease-in-out infinite alternate;
+    }
+
+    @keyframes ring-pulse {
+      from {
+        box-shadow: 0 0 0 0 rgba(245, 196, 0, 0.4);
+        border-color: rgba(245, 196, 0, 0.6);
+      }
+
+      to {
+        box-shadow: 0 0 0 12px rgba(245, 196, 0, 0);
+        border-color: var(--yellow);
+      }
+    }
+
+    .avatar-fallback {
+      display: none;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #1A2A1E, #0F1A12);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .avatar-name {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 700;
+      margin-top: 1rem;
+      letter-spacing: -0.3px;
+    }
+
+    .avatar-tagline {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    /* WAVEFORM */
+    .waveform {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      height: 32px;
+      margin-top: 12px;
+    }
+
+    .wave-bar {
+      width: 4px;
+      background: rgba(245, 196, 0, 0.25);
+      border-radius: 4px;
+      height: 6px;
+    }
+
+    .wave-bar.active {
+      background: var(--yellow);
+      animation: wave-anim 0.6s ease-in-out infinite alternate;
+    }
+
+    .wave-bar:nth-child(1) {
+      animation-delay: 0s
+    }
+
+    .wave-bar:nth-child(2) {
+      animation-delay: 0.08s
+    }
+
+    .wave-bar:nth-child(3) {
+      animation-delay: 0.16s
+    }
+
+    .wave-bar:nth-child(4) {
+      animation-delay: 0.24s
+    }
+
+    .wave-bar:nth-child(5) {
+      animation-delay: 0.16s
+    }
+
+    .wave-bar:nth-child(6) {
+      animation-delay: 0.08s
+    }
+
+    .wave-bar:nth-child(7) {
+      animation-delay: 0s
+    }
+
+    .wave-bar:nth-child(8) {
+      animation-delay: 0.08s
+    }
+
+    .wave-bar:nth-child(9) {
+      animation-delay: 0.16s
+    }
+
+    @keyframes wave-anim {
+      from {
+        height: 6px
+      }
+
+      to {
+        height: 28px
+      }
+    }
+
+    /* GESTURE */
+    .gesture-panel {
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    .gesture-label {
+      color: rgba(255, 255, 255, 0.3);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .gesture-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .gesture-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 8px 4px;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 11px;
+      font-family: 'Sarabun', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .gesture-btn:hover {
+      background: rgba(245, 196, 0, 0.15);
+      border-color: rgba(245, 196, 0, 0.4);
+      color: var(--yellow);
+      transform: translateY(-1px);
+    }
+
+    .gesture-btn.triggered {
+      background: rgba(245, 196, 0, 0.25);
+      border-color: var(--yellow);
+      color: var(--yellow);
+      transform: scale(0.96);
+    }
+
+    .gesture-icon {
+      font-size: 18px;
+    }
+
+    /* Gesture emoji overlay on avatar */
+    .avatar-gesture-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gesture-emoji-pop {
+      font-size: 72px;
+      line-height: 1;
+      opacity: 0;
+      transform: scale(0.3) translateY(10px);
+      transition: none;
+    }
+
+    .gesture-emoji-pop.show {
+      animation: gesture-pop 1.2s ease forwards;
+    }
+
+    @keyframes gesture-pop {
+      0% {
+        opacity: 0;
+        transform: scale(0.3) translateY(10px);
+      }
+
+      20% {
+        opacity: 1;
+        transform: scale(1.15) translateY(-5px);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+
+      80% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(0.8) translateY(-20px);
+      }
+    }
+
+    /* Avatar bounce/shake animations */
+    .avatar-img-wrapper.gesture-bounce {
+      animation: avatar-bounce 0.5s ease !important;
+    }
+
+    .avatar-img-wrapper.gesture-shake {
+      animation: avatar-shake 0.5s ease !important;
+    }
+
+    .avatar-img-wrapper.gesture-pulse {
+      animation: avatar-pulse 0.6s ease !important;
+    }
+
+    @keyframes avatar-bounce {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      30% {
+        transform: translateY(-12px);
+      }
+
+      60% {
+        transform: translateY(-5px);
+      }
+    }
+
+    @keyframes avatar-shake {
+
+      0%,
+      100% {
+        transform: rotate(0deg);
+      }
+
+      20% {
+        transform: rotate(-6deg);
+      }
+
+      40% {
+        transform: rotate(6deg);
+      }
+
+      60% {
+        transform: rotate(-4deg);
+      }
+
+      80% {
+        transform: rotate(4deg);
+      }
+    }
+
+    @keyframes avatar-pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      40% {
+        transform: scale(1.08);
+      }
+
+      70% {
+        transform: scale(0.96);
+      }
+    }
+
+    /* RIGHT PANEL */
+    .right-panel {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      overflow: hidden;
+    }
+
+    .transcript-area {
+      overflow-y: auto;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .session-header {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius) var(--radius) 0 0;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: none;
+    }
+
+    .session-info h2 {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .session-info p {
+      font-size: 12px;
+      color: var(--text3);
+      margin-top: 2px;
+    }
+
+    .session-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* TIMER BAR */
+    .timer-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0 0 var(--radius) var(--radius);
+      padding: 10px 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 0;
+    }
+
+    .timer-display {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 22px;
+      font-weight: 600;
+      min-width: 64px;
+      color: var(--green);
+      transition: color 0.5s;
+      letter-spacing: 1px;
+    }
+
+    .timer-display.warn {
+      color: #E85C0D;
+    }
+
+    .timer-display.danger {
+      color: #DC2626;
+      animation: timer-flash 0.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes timer-flash {
+      from {
+        opacity: 1;
+      }
+
+      to {
+        opacity: 0.4;
+      }
+    }
+
+    .timer-progress-wrap {
+      flex: 1;
+      height: 5px;
+      background: rgba(0, 0, 0, 0.08);
+      border-radius: 3px;
+      overflow: hidden;
+      min-width: 60px;
+    }
+
+    .timer-progress-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 3px;
+      transition: width 1s linear, background 0.5s;
+    }
+
+    .timer-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .timer-btn:hover {
+      background: var(--yellow-light);
+      border-color: var(--yellow);
+    }
+
+    .timer-btn.active {
+      background: var(--yellow);
+      border-color: var(--yellow-dark);
+    }
+
+    /* Phase tabs */
+    .phase-tabs {
+      display: flex;
+      gap: 6px;
+    }
+
+    .phase-tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1px;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 5px 4px;
+      font-size: 11px;
+      font-family: 'Sarabun', sans-serif;
+      cursor: pointer;
+      color: var(--text3);
+      transition: all 0.2s;
+      line-height: 1.3;
+    }
+
+    .phase-tab:hover {
+      border-color: var(--border2);
+      color: var(--text);
+    }
+
+    .phase-tab.active {
+      background: var(--green-light);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .phase-tab.running {
+      background: #FFF8D6;
+      border-color: var(--yellow-dark);
+      color: var(--yellow-dark);
+    }
+
+    .phase-tab.done {
+      background: #FEE2E2;
+      border-color: #DC2626;
+      color: #DC2626;
+    }
+
+    .phase-clock {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .btn-sm {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-family: 'Sarabun', sans-serif;
+      color: var(--text2);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+
+    .btn-sm:hover {
+      background: var(--yellow-light);
+      border-color: var(--yellow);
+      color: var(--yellow-dark);
+    }
+
+    .btn-sm.primary {
+      background: var(--yellow);
+      border-color: var(--yellow-dark);
+      color: #1A1A1A;
+      font-weight: 600;
+    }
+
+    .btn-sm.primary:hover {
+      background: var(--yellow-dark);
+      color: #fff;
+    }
+
+    /* STT */
+    .stt-live-box {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      min-height: 72px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.3s;
+    }
+
+    .stt-live-box.listening {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(232, 92, 13, 0.1);
+    }
+
+    .stt-live-box.processing {
+      border-color: var(--yellow);
+      box-shadow: 0 0 0 3px rgba(245, 196, 0, 0.12);
+    }
+
+    .stt-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stt-indicator {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text3);
+    }
+
+    .stt-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text3);
+    }
+
+    .stt-dot.listening {
+      background: var(--orange);
+      animation: pulse-red 1s infinite;
+    }
+
+    .stt-dot.processing {
+      background: var(--yellow-dark);
+      animation: pulse-yellow 0.8s infinite;
+    }
+
+    @keyframes pulse-red {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(1.3);
+        opacity: 0.7;
+      }
+    }
+
+    @keyframes pulse-yellow {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.4;
+      }
+    }
+
+    .stt-live-text {
+      font-size: 15px;
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 24px;
+    }
+
+    .stt-live-text .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 16px;
+      background: var(--orange);
+      margin-left: 2px;
+      vertical-align: middle;
+      animation: blink 0.8s steps(2) infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0;
+      }
+    }
+
+    /* MESSAGES */
+    .messages-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .msg {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .msg.user {
+      flex-direction: row-reverse;
+    }
+
+    .msg-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .msg-avatar.ai {
+      background: #1A2A1E;
+      border: 1.5px solid rgba(245, 196, 0, 0.4);
+      overflow: hidden;
+    }
+
+    .msg-avatar.ai img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 15%;
+    }
+
+    .msg-avatar.user {
+      background: var(--yellow-light);
+      color: var(--yellow-dark);
+      border: 1.5px solid rgba(245, 196, 0, 0.3);
+      font-size: 13px;
+    }
+
+    .msg-bubble {
+      max-width: 75%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .msg.ai .msg-bubble {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top-left-radius: 4px;
+    }
+
+    .msg.user .msg-bubble {
+      background: #1A2A1E;
+      color: rgba(255, 255, 255, 0.92);
+      border-top-right-radius: 4px;
+    }
+
+    .msg-time {
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 4px;
+    }
+
+    .msg.ai .msg-time {
+      text-align: left;
+      margin-left: 42px;
+    }
+
+    .msg.user .msg-time {
+      text-align: right;
+    }
+
+    .kb-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--green-light);
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-top: 6px;
+      margin-right: 4px;
+    }
+
+    .kb-tag-dot {
+      width: 5px;
+      height: 5px;
+      background: var(--green);
+      border-radius: 50%;
+    }
+
+    /* CONTROLS */
+    .controls-panel {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+    }
+
+    .controls-top {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .config-select {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 13px;
+      font-family: 'Sarabun', sans-serif;
+      color: var(--text);
+      flex: 1;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .controls-main {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mic-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 2px solid var(--border2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s;
+      flex-shrink: 0;
+      color: var(--text2);
+    }
+
+    .mic-btn:hover {
+      border-color: var(--orange);
+      color: var(--orange);
+    }
+
+    .mic-btn.listening {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: white;
+      animation: mic-pulse 1.5s infinite;
+    }
+
+    @keyframes mic-pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(232, 92, 13, 0.4);
+      }
+
+      50% {
+        box-shadow: 0 0 0 12px rgba(232, 92, 13, 0);
+      }
+    }
+
+    .text-input-wrap {
+      flex: 1;
+      position: relative;
+    }
+
+    .text-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 28px;
+      padding: 12px 50px 12px 18px;
+      font-size: 14px;
+      font-family: 'Sarabun', sans-serif;
+      color: var(--text);
+      outline: none;
+      resize: none;
+      height: 48px;
+      transition: border-color 0.2s;
+    }
+
+    .text-input:focus {
+      border-color: var(--yellow);
+    }
+
+    .text-input::placeholder {
+      color: var(--text3);
+    }
+
+    .send-btn {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 32px;
+      background: var(--yellow);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      color: #1A1A1A;
+    }
+
+    .send-btn:hover {
+      background: var(--yellow-dark);
+      color: white;
+      transform: translateY(-50%) scale(1.05);
+    }
+
+    .action-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .action-btn {
+      width: 80px;
+      padding: 6px 0;
+      border-radius: 8px;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      font-size: 11px;
+      font-family: 'Sarabun', sans-serif;
+      color: var(--text2);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .action-btn:hover {
+      background: var(--yellow-light);
+      border-color: var(--yellow);
+      color: var(--yellow-dark);
+    }
+
+    .action-btn.danger:hover {
+      background: #FEE2E2;
+      border-color: #EF4444;
+      color: #DC2626;
+    }
+
+    .action-btn.stop {
+      display: none;
+      border-color: #EF4444;
+      background: #FEF2F2;
+      color: #DC2626;
+      animation: stop-pulse 1s ease-in-out infinite alternate;
+    }
+
+    .action-btn.stop.active {
+      display: block;
+    }
+
+    @keyframes stop-pulse {
+      from {
+        box-shadow: none;
+      }
+
+      to {
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+      }
+    }
+
+    /* KB SIDEBAR */
+    .kb-panel {
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      width: 300px;
+      padding: 1.25rem;
+      overflow-y: auto;
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      z-index: 50;
+    }
+
+    .kb-panel.open {
+      transform: translateX(0);
+    }
+
+    .kb-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 0.5px;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+    }
+
+    .kb-entry {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+    }
+
+    .kb-entry-user {
+      font-size: 11px;
+      color: var(--text3);
+      margin-bottom: 4px;
+    }
+
+    .kb-entry-text {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .kb-entry-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 6px;
+    }
+
+    .kb-chip {
+      background: var(--yellow-light);
+      color: var(--yellow-dark);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+
+    .field-label {
+      font-size: 11px;
+      color: var(--text3);
+      margin-bottom: 6px;
+      margin-top: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .field-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-family: 'Sarabun', sans-serif;
+      color: var(--text);
+      outline: none;
+      height: 36px;
+    }
+
+    .field-input:focus {
+      border-color: var(--yellow);
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1A2A1E;
+      border: 1px solid rgba(245, 196, 0, 0.2);
+      border-radius: 10px;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.8);
+      z-index: 200;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    .toast-icon {
+      color: var(--yellow);
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 4px;
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* SESSION OVERLAY */
+    .session-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 26, 18, 0.75);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      backdrop-filter: blur(4px);
+    }
+
+    .session-overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .session-modal {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 380px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+    }
+
+    .session-modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* SCORE CARD */
+    .score-card {
+      background: linear-gradient(145deg, #1A2A1E, #0F1A12);
+      border-radius: 12px;
+      padding: 1.25rem;
+      color: white;
+    }
+
+    .score-total {
+      font-size: 40px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .score-label {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 12px;
+    }
+
+    .score-row:last-child {
+      border-bottom: none;
+    }
+
+    .score-bar-wrap {
+      flex: 1;
+      margin: 0 10px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      background: var(--yellow);
+      border-radius: 4px;
+    }
+
+    .score-val {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--yellow);
+      min-width: 36px;
+      text-align: right;
+    }
+
+    /* SESSIONS LIST */
+    .session-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .session-item:hover {
+      border-color: var(--yellow);
+      background: var(--yellow-light);
+    }
+
+    .session-item.active {
+      border-color: var(--green);
+      background: var(--green-light);
+    }
+  </style>
 </head>
+
 <body>
 
-<header class="header">
-  <div class="header-brand">
-    <span class="brand-dot"></span>
-    BESTIES AI
-    <span style="font-weight:300;color:var(--text3);font-size:14px;">/ BizPitching</span>
-  </div>
-  <div class="header-session">
-    <span class="session-badge" id="team-badge">LIVE SESSION</span>
-    <span class="session-id" id="session-id">SESSION-0000</span>
-    <button class="btn-sm" onclick="showSessionModal()">+ ทีมใหม่</button>
-    <button class="btn-sm" onclick="toggleKB()">⚙️ ตั้งค่า</button>
-    <button class="btn-sm primary" onclick="exportSession()">Export ผล</button>
-  </div>
-</header>
-
-<div class="main">
-
-  <!-- LEFT: AVATAR -->
-  <div class="avatar-panel">
-    <div class="avatar-bg-rings">
-      <div class="ring ring-1"></div>
-      <div class="ring ring-2"></div>
-      <div class="ring ring-3"></div>
+  <header class="header">
+    <div class="header-brand">
+      <span class="brand-dot"></span>
+      BESTIES AI
+      <span style="font-weight:300;color:var(--text3);font-size:14px;">/ BizPitching</span>
     </div>
+    <div class="header-session">
+      <span class="session-badge" id="team-badge">LIVE SESSION</span>
+      <span class="session-id" id="session-id">SESSION-0000</span>
+      <button class="btn-sm" onclick="showSessionModal()">+ ทีมใหม่</button>
+      <button class="btn-sm" onclick="toggleKB()">⚙️ ตั้งค่า</button>
+      <button class="btn-sm primary" onclick="exportSession()">Export ผล</button>
+    </div>
+  </header>
 
-    <div class="avatar-top">
-      <div class="avatar-label">AI HOST</div>
-      <div class="avatar-status">
-        <div class="status-dot"></div>
-        <span id="ai-status-text">พร้อมใช้งาน</span>
+  <div class="main">
+
+    <!-- LEFT: AVATAR -->
+    <div class="avatar-panel">
+      <div class="avatar-bg-rings">
+        <div class="ring ring-1"></div>
+        <div class="ring ring-2"></div>
+        <div class="ring ring-3"></div>
       </div>
-    </div>
 
-    <div class="avatar-container">
-      <div class="avatar-glow"></div>
-      <div class="avatar-img-wrapper" id="avatar-wrapper">
-        <img src="Besties.png" alt="Besties AI" id="avatar-img"
-          onerror="this.style.display='none';document.getElementById('avatar-fallback').style.display='flex'">
-        <div id="avatar-fallback" class="avatar-fallback">
-          <div style="font-size:64px;">⛄</div>
-          <div style="color:var(--yellow);font-weight:700;font-size:16px;">BESTIES AI</div>
-        </div>
-        <div class="avatar-gesture-overlay">
-          <div class="gesture-emoji-pop" id="gesture-emoji-pop"></div>
+      <div class="avatar-top">
+        <div class="avatar-label">AI HOST</div>
+        <div class="avatar-status">
+          <div class="status-dot"></div>
+          <span id="ai-status-text">พร้อมใช้งาน</span>
         </div>
       </div>
 
-      <div class="avatar-name">Besties AI</div>
-      <div class="avatar-tagline" id="avatar-tagline">กรรมการ AI สำหรับการประกวดไอเดีย</div>
-
-      <div class="waveform">
-        <div class="wave-bar" id="wb1"></div><div class="wave-bar" id="wb2"></div>
-        <div class="wave-bar" id="wb3"></div><div class="wave-bar" id="wb4"></div>
-        <div class="wave-bar" id="wb5"></div><div class="wave-bar" id="wb6"></div>
-        <div class="wave-bar" id="wb7"></div><div class="wave-bar" id="wb8"></div>
-        <div class="wave-bar" id="wb9"></div>
-      </div>
-    </div>
-
-    <div class="gesture-panel">
-      <div class="gesture-label">Action / ท่าทาง</div>
-      <div class="gesture-grid">
-        <button class="gesture-btn" onclick="triggerGesture(event,'👋','ทักทาย')"><span class="gesture-icon">👋</span>ทักทาย</button>
-        <button class="gesture-btn" onclick="triggerGesture(event,'👍','เห็นด้วย')"><span class="gesture-icon">👍</span>เห็นด้วย</button>
-        <button class="gesture-btn" onclick="triggerGesture(event,'🤔','คิด')"><span class="gesture-icon">🤔</span>คิด</button>
-        <button class="gesture-btn" onclick="triggerGesture(event,'👏','ปรบมือ')"><span class="gesture-icon">👏</span>ปรบมือ</button>
-        <button class="gesture-btn" onclick="triggerGesture(event,'☝️','ชี้แนะ')"><span class="gesture-icon">☝️</span>ชี้แนะ</button>
-        <button class="gesture-btn" onclick="triggerGesture(event,'😐','ลังเล')"><span class="gesture-icon">😐</span>ลังเล</button>
-        <button class="gesture-btn" onclick="triggerGesture(event,'🎉','ตื่นเต้น')"><span class="gesture-icon">🎉</span>ตื่นเต้น</button>
-        <button class="gesture-btn" onclick="triggerGesture(event,'🙏','ขอบคุณ')"><span class="gesture-icon">🙏</span>ขอบคุณ</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- RIGHT PANEL -->
-  <div class="right-panel" style="position:relative;">
-
-    <!-- KB / SETTINGS PANEL -->
-    <div class="kb-panel" id="kb-panel">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-        <div class="kb-title">⚙️ ตั้งค่าระบบ</div>
-        <button class="btn-sm" onclick="toggleKB()">✕</button>
-      </div>
-
-      <div class="field-label">Gemini API Key</div>
-      <input type="password" id="gemini-key" class="field-input" placeholder="AIza...">
-
-      <div class="field-label">N8N Webhook Base URL (optional)</div>
-      <input type="text" id="n8n-webhook" class="field-input" placeholder="https://n8n.server.com/webhook">
-      <div style="font-size:11px;color:var(--text3);margin-top:4px;">ใส่แค่ base URL — ระบบจะต่อ /besties-kb, /besties-sessions, /besties-analyze ให้เอง</div>
-
-      <button class="btn-sm primary" style="width:100%;margin-top:14px;padding:10px;" onclick="saveConfig()">💾 บันทึกการตั้งค่า</button>
-
-      <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
-          <div class="kb-title" style="margin-bottom:0;">👥 Sessions ทั้งหมด</div>
-          <button class="btn-sm" onclick="listSessions()">โหลด</button>
-        </div>
-        <div id="sessions-list-panel"><div style="font-size:13px;color:var(--text3);text-align:center;padding:1rem 0;">กด "โหลด" เพื่อดูรายการทีม</div></div>
-      </div>
-
-      <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem;">
-        <div class="kb-title" style="margin-bottom:0.75rem;">📋 Knowledge Base (session นี้)</div>
-        <div id="kb-entries"><div style="font-size:13px;color:var(--text3);text-align:center;padding:1.5rem 0;">ยังไม่มีข้อมูล<br>เริ่มพูดเพื่อบันทึก</div></div>
-      </div>
-    </div>
-
-    <!-- CHAT AREA -->
-    <div class="transcript-area" id="transcript-area">
-      <div class="session-header">
-        <div class="session-info">
-          <h2 id="contestant-name">ผู้เข้าแข่งขัน: รอเริ่มต้น</h2>
-          <p id="session-meta">กด 🎤 หรือพิมพ์เพื่อเริ่มสนทนา • บันทึกอัตโนมัติ</p>
-        </div>
-        <div class="session-actions">
-          <button class="btn-sm" onclick="newContestant()">+ ผู้แข่งขันใหม่</button>
-          <button class="btn-sm" onclick="analyzeIdea()">วิเคราะห์ไอเดีย ↗</button>
-        </div>
-      </div>
-
-      <!-- TIMER BAR -->
-      <div class="timer-bar">
-        <span style="font-size:12px;color:var(--text3);font-weight:600;white-space:nowrap;">⏱ เวลานำเสนอ</span>
-        <select id="timer-preset" class="timer-preset" onchange="timerPresetChange()">
-          <option value="180">3 นาที</option>
-          <option value="300" selected>5 นาที</option>
-          <option value="420">7 นาที</option>
-          <option value="600">10 นาที</option>
-          <option value="900">15 นาที</option>
-          <option value="custom">กำหนดเอง</option>
-        </select>
-        <input type="number" id="timer-custom" min="1" max="99" placeholder="นาที"
-          style="display:none;width:60px;padding:5px 6px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);font-size:12px;font-family:'Sarabun',sans-serif;"
-          onchange="timerSetCustom()">
-        <div class="timer-progress-wrap"><div class="timer-progress-fill" id="timer-fill" style="width:100%"></div></div>
-        <div class="timer-display" id="timer-display">5:00</div>
-        <button class="timer-btn" id="timer-start-btn" onclick="timerToggle()" title="Start/Pause">▶</button>
-        <button class="timer-btn" onclick="timerReset()" title="Reset">↺</button>
-      </div>
-
-      <!-- STT Live -->
-      <div class="stt-live-box" id="stt-box">
-        <div class="stt-header">
-          <div class="stt-indicator">
-            <div class="stt-dot" id="stt-dot"></div>
-            <span id="stt-status">รอเริ่ม • กดปุ่มไมค์เพื่อพูด</span>
+      <div class="avatar-container">
+        <div class="avatar-glow"></div>
+        <div class="avatar-img-wrapper" id="avatar-wrapper">
+          <img src="Besties.png" alt="Besties AI" id="avatar-img"
+            onerror="this.style.display='none';document.getElementById('avatar-fallback').style.display='flex'">
+          <div id="avatar-fallback" class="avatar-fallback">
+            <div style="font-size:64px;">⛄</div>
+            <div style="color:var(--yellow);font-weight:700;font-size:16px;">BESTIES AI</div>
           </div>
-          <span style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">TH-TH</span>
-        </div>
-        <div class="stt-live-text">
-          <span id="stt-interim" style="color:var(--text3);font-style:italic;"></span>
-          <span id="stt-final"></span>
-          <span class="cursor" id="stt-cursor" style="display:none;"></span>
-        </div>
-      </div>
-
-      <!-- Messages -->
-      <div class="messages-list" id="messages-list">
-        <div class="msg ai">
-          <div class="msg-avatar ai">
-            <img src="Besties.png" alt="AI" onerror="this.parentElement.textContent='B'">
-          </div>
-          <div>
-            <div class="msg-bubble">สวัสดีครับทุกท่าน! ผม Besties AI พิธีกรดิจิทัลประจำงานประกวดไอเดียวันนี้ครับ 🎙️
-
-พร้อมแล้วนะครับ — ขอเชิญผู้เข้าแข่งขันแนะนำตัวและนำเสนอไอเดียได้เลยครับ!</div>
-            <div class="msg-time">เพิ่งเริ่ม</div>
+          <div class="avatar-gesture-overlay">
+            <div class="gesture-emoji-pop" id="gesture-emoji-pop"></div>
           </div>
         </div>
+
+        <div class="avatar-name">Besties AI</div>
+        <div class="avatar-tagline" id="avatar-tagline">กรรมการ AI สำหรับการประกวดไอเดีย</div>
+
+        <div class="waveform">
+          <div class="wave-bar" id="wb1"></div>
+          <div class="wave-bar" id="wb2"></div>
+          <div class="wave-bar" id="wb3"></div>
+          <div class="wave-bar" id="wb4"></div>
+          <div class="wave-bar" id="wb5"></div>
+          <div class="wave-bar" id="wb6"></div>
+          <div class="wave-bar" id="wb7"></div>
+          <div class="wave-bar" id="wb8"></div>
+          <div class="wave-bar" id="wb9"></div>
+        </div>
+      </div>
+
+      <div class="gesture-panel">
+        <div class="gesture-label">Action / ท่าทาง</div>
+        <div class="gesture-grid">
+          <button class="gesture-btn" onclick="triggerGesture(event,'👋','ทักทาย')"><span
+              class="gesture-icon">👋</span>ทักทาย</button>
+          <button class="gesture-btn" onclick="triggerGesture(event,'👍','เห็นด้วย')"><span
+              class="gesture-icon">👍</span>เห็นด้วย</button>
+          <button class="gesture-btn" onclick="triggerGesture(event,'🤔','คิด')"><span
+              class="gesture-icon">🤔</span>คิด</button>
+          <button class="gesture-btn" onclick="triggerGesture(event,'👏','ปรบมือ')"><span
+              class="gesture-icon">👏</span>ปรบมือ</button>
+          <button class="gesture-btn" onclick="triggerGesture(event,'☝️','ชี้แนะ')"><span
+              class="gesture-icon">☝️</span>ชี้แนะ</button>
+          <button class="gesture-btn" onclick="triggerGesture(event,'😐','ลังเล')"><span
+              class="gesture-icon">😐</span>ลังเล</button>
+          <button class="gesture-btn" onclick="triggerGesture(event,'🎉','ตื่นเต้น')"><span
+              class="gesture-icon">🎉</span>ตื่นเต้น</button>
+          <button class="gesture-btn" onclick="triggerGesture(event,'🙏','ขอบคุณ')"><span
+              class="gesture-icon">🙏</span>ขอบคุณ</button>
+        </div>
       </div>
     </div>
 
-    <!-- ADMIN SPEAK BOX -->
-    <div style="background:var(--surface);border-top:1px solid var(--border);padding:0.75rem 1.5rem;display:flex;gap:8px;align-items:center;">
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-        <div style="width:7px;height:7px;border-radius:50%;background:var(--orange);"></div>
-        <span style="font-size:11px;font-weight:600;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase;">Admin</span>
-      </div>
-      <textarea id="admin-text" placeholder="พิมพ์ข้อความให้ AI พูด..." rows="1"
-        style="flex:1;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:8px 14px;font-size:13px;font-family:'Sarabun',sans-serif;color:var(--text);outline:none;resize:none;height:38px;line-height:1.4;transition:border-color 0.2s;"
-        onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border)'"
-        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();adminSpeak();}"></textarea>
-      <button onclick="adminSpeak()"
-        style="flex-shrink:0;background:var(--orange);border:none;border-radius:10px;padding:0 16px;height:38px;color:#fff;font-size:13px;font-family:'Sarabun',sans-serif;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s;white-space:nowrap;"
-        onmouseover="this.style.background='#C44D0A'" onmouseout="this.style.background='var(--orange)'">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-        พูด
-      </button>
-    </div>
+    <!-- RIGHT PANEL -->
+    <div class="right-panel" style="position:relative;">
 
-    <!-- CONTROLS -->
-    <div class="controls-panel">
-      <div class="controls-top">
-        <select class="config-select" id="mode-select">
-          <option value="interview">โหมด: สัมภาษณ์ไอเดีย</option>
-          <option value="pitch">โหมด: Pitch Session</option>
-          <option value="qa">โหมด: ถาม-ตอบ</option>
-          <!-- <option value="analyze">โหมด: วิเคราะห์ผล</option> -->
-        </select>
-        <select class="config-select" id="voice-select" style="max-width:160px;">
-          <option value="Schedar">เสียง: Schedar (ชาย)</option>
-        </select>
+      <!-- KB / SETTINGS PANEL -->
+      <div class="kb-panel" id="kb-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <div class="kb-title">⚙️ ตั้งค่าระบบ</div>
+          <button class="btn-sm" onclick="toggleKB()">✕</button>
+        </div>
+
+        <div class="field-label">Gemini API Key</div>
+        <input type="password" id="gemini-key" class="field-input" placeholder="AIza...">
+
+        <div class="field-label">N8N Webhook Base URL (optional)</div>
+        <input type="text" id="n8n-webhook" class="field-input" placeholder="https://n8n.server.com/webhook">
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;">ใส่แค่ base URL — ระบบจะต่อ /besties-kb,
+          /besties-sessions, /besties-analyze ให้เอง</div>
+
+        <button class="btn-sm primary" style="width:100%;margin-top:14px;padding:10px;" onclick="saveConfig()">💾
+          บันทึกการตั้งค่า</button>
+
+        <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+            <div class="kb-title" style="margin-bottom:0;">👥 Sessions ทั้งหมด</div>
+            <button class="btn-sm" onclick="listSessions()">โหลด</button>
+          </div>
+          <div id="sessions-list-panel">
+            <div style="font-size:13px;color:var(--text3);text-align:center;padding:1rem 0;">กด "โหลด" เพื่อดูรายการทีม
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem;">
+          <div class="kb-title" style="margin-bottom:0.75rem;">📋 Knowledge Base (session นี้)</div>
+          <div id="kb-entries">
+            <div style="font-size:13px;color:var(--text3);text-align:center;padding:1.5rem 0;">
+              ยังไม่มีข้อมูล<br>เริ่มพูดเพื่อบันทึก</div>
+          </div>
+        </div>
+
+        <!-- PROMPT EDITOR -->
+        <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+            <div class="kb-title" style="margin-bottom:0;">✏️ แก้ไข Prompt</div>
+            <button class="btn-sm" onclick="togglePromptEditor()" id="prompt-editor-toggle">เปิด</button>
+          </div>
+          <div id="prompt-editor-panel" style="display:none;">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:12px;line-height:1.6;">แก้ไข prompt
+              แต่ละโหมดได้โดยตรง — บันทึกจะเก็บใน browser นี้</div>
+
+            <!-- Model A -->
+            <div style="margin-bottom:14px;">
+              <div
+                style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:5px;letter-spacing:0.4px;text-transform:uppercase;">
+                📊 Model A — วิเคราะห์ Pitch</div>
+              <textarea id="prompt-editor-pitch" rows="7"
+                style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;font-family:'Sarabun',sans-serif;color:var(--text);resize:vertical;line-height:1.6;outline:none;"
+                onfocus="this.style.borderColor='var(--green)'"
+                onblur="this.style.borderColor='var(--border)'"></textarea>
+            </div>
+
+            <!-- Model B -->
+            <div style="margin-bottom:14px;">
+              <div
+                style="font-size:11px;font-weight:700;color:var(--orange);margin-bottom:5px;letter-spacing:0.4px;text-transform:uppercase;">
+                🔍 Model B — ซักถาม AI</div>
+              <textarea id="prompt-editor-qa" rows="7"
+                style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;font-family:'Sarabun',sans-serif;color:var(--text);resize:vertical;line-height:1.6;outline:none;"
+                onfocus="this.style.borderColor='var(--orange)'"
+                onblur="this.style.borderColor='var(--border)'"></textarea>
+            </div>
+
+            <!-- Model C -->
+            <div style="margin-bottom:14px;">
+              <div
+                style="font-size:11px;font-weight:700;color:var(--yellow-dark);margin-bottom:5px;letter-spacing:0.4px;text-transform:uppercase;">
+                💬 Model C — สรุป Feedback</div>
+              <textarea id="prompt-editor-analyze" rows="7"
+                style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;font-family:'Sarabun',sans-serif;color:var(--text);resize:vertical;line-height:1.6;outline:none;"
+                onfocus="this.style.borderColor='var(--yellow-dark)'"
+                onblur="this.style.borderColor='var(--border)'"></textarea>
+            </div>
+
+            <div style="display:flex;gap:8px;">
+              <button class="btn-sm" onclick="resetPrompts()" style="flex:1;">↺ รีเซ็ต</button>
+              <button class="btn-sm primary" onclick="savePrompts()" style="flex:2;padding:8px;">💾 บันทึก
+                Prompt</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="controls-main">
-        <button class="mic-btn" id="mic-btn" onclick="toggleMic()">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-            <line x1="12" y1="19" x2="12" y2="23"/>
-            <line x1="8" y1="23" x2="16" y2="23"/>
+
+      <!-- CHAT AREA -->
+      <div class="transcript-area" id="transcript-area">
+        <div class="session-header">
+          <div class="session-info">
+            <h2 id="contestant-name">ผู้เข้าแข่งขัน: รอเริ่มต้น</h2>
+            <p id="session-meta">กด 🎤 หรือพิมพ์เพื่อเริ่มสนทนา • บันทึกอัตโนมัติ</p>
+          </div>
+          <div class="session-actions">
+            <button class="btn-sm" onclick="newContestant()">+ ผู้แข่งขันใหม่</button>
+            <button class="btn-sm" onclick="analyzeIdea()">วิเคราะห์ไอเดีย ↗</button>
+          </div>
+        </div>
+
+        <!-- TIMER BAR — 3 phases -->
+        <div class="timer-bar">
+          <div class="phase-tabs">
+            <button class="phase-tab active" id="phase-tab-pitch" onclick="switchPhase('pitch')">
+              <span>📊 Pitch</span>
+              <span class="phase-clock" id="phase-clock-pitch">5:00</span>
+            </button>
+            <button class="phase-tab" id="phase-tab-aiq" onclick="switchPhase('aiq')">
+              <span>🔍 AI Q&A</span>
+              <span class="phase-clock" id="phase-clock-aiq">5:00</span>
+            </button>
+            <button class="phase-tab" id="phase-tab-jury" onclick="switchPhase('jury')">
+              <span>👔 กรรมการ</span>
+              <span class="phase-clock" id="phase-clock-jury">5:00</span>
+            </button>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="timer-progress-wrap">
+              <div class="timer-progress-fill" id="timer-fill" style="width:100%"></div>
+            </div>
+            <div class="timer-display" id="timer-display">5:00</div>
+            <button class="timer-btn" id="timer-start-btn" onclick="timerToggle()" title="Start/Pause">▶</button>
+            <button class="timer-btn" onclick="timerResetPhase()" title="Reset">↺</button>
+          </div>
+        </div>
+
+        <!-- STT Live -->
+        <div class="stt-live-box" id="stt-box">
+          <div class="stt-header">
+            <div class="stt-indicator">
+              <div class="stt-dot" id="stt-dot"></div>
+              <span id="stt-status">รอเริ่ม • กดปุ่มไมค์เพื่อพูด</span>
+            </div>
+            <span style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">TH-TH</span>
+          </div>
+          <div class="stt-live-text">
+            <span id="stt-interim" style="color:var(--text3);font-style:italic;"></span>
+            <span id="stt-final"></span>
+            <span class="cursor" id="stt-cursor" style="display:none;"></span>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="messages-list" id="messages-list">
+          <div class="msg ai">
+            <div class="msg-avatar ai">
+              <img src="Besties.png" alt="AI" onerror="this.parentElement.textContent='B'">
+            </div>
+            <div>
+              <div class="msg-bubble">สวัสดีครับทุกท่าน! ผม Besties AI พิธีกรดิจิทัลประจำงานประกวดไอเดียวันนี้ครับ 🎙️
+
+                พร้อมแล้วนะครับ — ขอเชิญผู้เข้าแข่งขันแนะนำตัวและนำเสนอไอเดียได้เลยครับ!</div>
+              <div class="msg-time">เพิ่งเริ่ม</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN SPEAK BOX -->
+      <div
+        style="background:var(--surface);border-top:1px solid var(--border);padding:0.75rem 1.5rem;display:flex;gap:8px;align-items:center;">
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <div style="width:7px;height:7px;border-radius:50%;background:var(--orange);"></div>
+          <span
+            style="font-size:11px;font-weight:600;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase;">Admin</span>
+        </div>
+        <textarea id="admin-text" placeholder="พิมพ์ข้อความให้ AI พูด..." rows="1"
+          style="flex:1;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:8px 14px;font-size:13px;font-family:'Sarabun',sans-serif;color:var(--text);outline:none;resize:none;height:38px;line-height:1.4;transition:border-color 0.2s;"
+          onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border)'"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();adminSpeak();}"></textarea>
+        <button onclick="adminSpeak()"
+          style="flex-shrink:0;background:var(--orange);border:none;border-radius:10px;padding:0 16px;height:38px;color:#fff;font-size:13px;font-family:'Sarabun',sans-serif;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s;white-space:nowrap;"
+          onmouseover="this.style.background='#C44D0A'" onmouseout="this.style.background='var(--orange)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
           </svg>
+          พูด
         </button>
-        <div class="text-input-wrap">
-          <textarea class="text-input" id="text-input" placeholder="พิมพ์ข้อความหรือกดไมค์เพื่อพูด..."
-            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
-          <button class="send-btn" onclick="sendMessage()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </div>
+
+      <!-- CONTROLS -->
+      <div class="controls-panel">
+        <div class="controls-top">
+          <select class="config-select" id="mode-select">
+            <option value="pitch">📊 Model A: วิเคราะห์ Pitch</option>
+            <option value="qa">🔍 Model B: ซักถาม AI</option>
+            <option value="analyze">💬 Model C: สรุป Feedback</option>
+          </select>
+          <select class="config-select" id="voice-select" style="max-width:160px;">
+            <!-- <option value="Schedar">เสียง: Schedar (ชาย)</option> -->
+            <option value="Alnilam">เสียง: Alnilam (ชาย)</option>
+          </select>
+        </div>
+        <div class="controls-main">
+          <button class="mic-btn" id="mic-btn" onclick="toggleMic()">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+              <line x1="12" y1="19" x2="12" y2="23" />
+              <line x1="8" y1="23" x2="16" y2="23" />
             </svg>
           </button>
-        </div>
-        <div class="action-btns">
-          <button class="action-btn stop" id="stop-speak-btn" onclick="stopAudio()">⏹ หยุด</button>
-          <button class="action-btn" id="speak-last-btn" onclick="speakLast(this)">🔊 พูดซ้ำ</button>
-          <button class="action-btn danger" onclick="clearSession()">🗑 ล้าง</button>
+          <div class="text-input-wrap">
+            <textarea class="text-input" id="text-input" placeholder="พิมพ์ข้อความหรือกดไมค์เพื่อพูด..."
+              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
+            <button class="send-btn" onclick="sendMessage()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
+            </button>
+          </div>
+          <div class="action-btns">
+            <button class="action-btn stop" id="stop-speak-btn" onclick="stopAudio()">⏹ หยุด</button>
+            <button class="action-btn" id="speak-last-btn" onclick="speakLast(this)">🔊 พูดซ้ำ</button>
+            <button class="action-btn danger" onclick="clearSession()">🗑 ล้าง</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<div class="toast" id="toast"><span class="toast-icon" id="toast-icon">●</span><span id="toast-msg">พร้อม</span></div>
+  <div class="toast" id="toast"><span class="toast-icon" id="toast-icon">●</span><span id="toast-msg">พร้อม</span></div>
 
-<!-- SESSION OVERLAY -->
-<div class="session-overlay" id="session-overlay">
-  <div class="session-modal">
-    <div class="session-modal-title">
-      <span class="brand-dot"></span>
-      เริ่ม Session ใหม่
-    </div>
-    <p style="font-size:13px;color:var(--text3);margin:0.4rem 0 1.5rem;">ระบุชื่อทีมหรือผู้แข่งขัน เพื่อเก็บข้อมูลแยกแต่ละ session</p>
-    <div class="field-label">ชื่อทีม / ผู้แข่งขัน <span style="color:var(--orange);">*</span></div>
-    <input type="text" id="new-team-name" class="field-input"
-      placeholder="เช่น ทีม Alpha, นาย สมชาย..."
-      style="height:42px;font-size:14px;"
-      onkeydown="if(event.key==='Enter') startSession();">
-    <div style="margin-top:10px;display:flex;align-items:center;gap:8px;">
-      <span style="font-size:11px;color:var(--text3);">Session ID:</span>
-      <span id="new-session-id-preview" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);"></span>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:1.5rem;">
-      <button class="btn-sm" onclick="closeSessionModal()" style="flex:1;">ข้ามไปก่อน</button>
-      <button class="btn-sm primary" onclick="startSession()" style="flex:2;padding:10px;font-size:14px;">▶ เริ่ม Session</button>
+  <!-- SESSION OVERLAY -->
+  <div class="session-overlay" id="session-overlay">
+    <div class="session-modal">
+      <div class="session-modal-title">
+        <span class="brand-dot"></span>
+        เริ่ม Session ใหม่
+      </div>
+      <p style="font-size:13px;color:var(--text3);margin:0.4rem 0 1.5rem;">ระบุชื่อทีมหรือผู้แข่งขัน
+        เพื่อเก็บข้อมูลแยกแต่ละ session</p>
+      <div class="field-label">ชื่อทีม / ผู้แข่งขัน <span style="color:var(--orange);">*</span></div>
+      <input type="text" id="new-team-name" class="field-input" placeholder="เช่น ทีม Alpha, นาย สมชาย..."
+        style="height:42px;font-size:14px;" onkeydown="if(event.key==='Enter') startSession();">
+      <div style="margin-top:10px;display:flex;align-items:center;gap:8px;">
+        <span style="font-size:11px;color:var(--text3);">Session ID:</span>
+        <span id="new-session-id-preview"
+          style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);"></span>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:1.5rem;">
+        <button class="btn-sm" onclick="closeSessionModal()" style="flex:1;">ข้ามไปก่อน</button>
+        <button class="btn-sm primary" onclick="startSession()" style="flex:2;padding:10px;font-size:14px;">▶ เริ่ม
+          Session</button>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-// ============================================================
-// CONFIG & STATE
-// ============================================================
-const CFG = {
-  geminiKey: localStorage.getItem('gemini_key') || '',
-  n8nWebhook: localStorage.getItem('n8n_webhook') || '',
-  sessionId: 'SESSION-' + Math.floor(Math.random()*9000+1000),
-  teamName: '',
-  contestant: 0
-};
-const ST = {
-  isListening: false,
-  isSpeaking: false,
-  recognition: null,
-  audio: null,
-  messages: [],
-  kb: [],
-  finalText: '',
-};
-
-document.getElementById('session-id').textContent = CFG.sessionId;
-if (CFG.geminiKey) document.getElementById('gemini-key').value = CFG.geminiKey;
-if (CFG.n8nWebhook) document.getElementById('n8n-webhook').value = CFG.n8nWebhook;
-
-// ============================================================
-// N8N URL HELPERS
-// ============================================================
-function getN8NBase() {
-  const wh = CFG.n8nWebhook;
-  if (!wh) return null;
-  return wh.replace(/\/$/, '').replace(/\/(besties-kb|besties-sessions|besties-analyze)$/, '');
-}
-
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ============================================================
-// AVATAR STATE
-// ============================================================
-function setAvatar(state) {
-  const bars    = document.querySelectorAll('.wave-bar');
-  const wrapper = document.getElementById('avatar-wrapper');
-  const statusEl  = document.getElementById('ai-status-text');
-  const taglineEl = document.getElementById('avatar-tagline');
-
-  bars.forEach(b => b.classList.remove('active'));
-  wrapper.classList.remove('speaking');
-
-  const cfg = {
-    speaking: { waves: true,  ring: true,  status: 'กำลังพูด...',   tagline: 'กำลังตอบกลับ...' },
-    listening: { waves: false, ring: false, status: 'กำลังฟัง...',   tagline: 'พูดได้เลยครับ' },
-    thinking:  { waves: false, ring: false, status: 'กำลังคิด...',   tagline: 'ประมวลผลอยู่...' },
-    idle:      { waves: false, ring: false, status: 'พร้อมใช้งาน',   tagline: 'กรรมการ AI สำหรับการประกวดไอเดีย' }
-  }[state] || { waves: false, ring: false, status: 'พร้อมใช้งาน', tagline: 'กรรมการ AI สำหรับการประกวดไอเดีย' };
-
-  if (cfg.waves) bars.forEach(b => b.classList.add('active'));
-  if (cfg.ring)  wrapper.classList.add('speaking');
-  statusEl.textContent  = cfg.status;
-  taglineEl.textContent = cfg.tagline;
-  document.getElementById('stop-speak-btn')?.classList.toggle('active', state === 'speaking');
-  dispBroadcast({ type: 'avatar', state, status: cfg.status, tagline: cfg.tagline });
-}
-
-// ============================================================
-// STT
-// ============================================================
-function setupSTT() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { showToast('⚠️', 'Browser ไม่รองรับ STT กรุณาใช้ Chrome'); return null; }
-  const r = new SR();
-  r.lang = 'th-TH'; r.continuous = true; r.interimResults = true;
-
-  r.onstart = () => {
-    ST.isListening = true;
-    document.getElementById('mic-btn').classList.add('listening');
-    document.getElementById('stt-box').classList.add('listening');
-    document.getElementById('stt-dot').className = 'stt-dot listening';
-    document.getElementById('stt-status').textContent = 'กำลังฟัง... พูดได้เลยครับ';
-    document.getElementById('stt-cursor').style.display = 'inline-block';
-    setAvatar('listening');
-  };
-
-  r.onresult = e => {
-    let interim = '', final = ST.finalText;
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
-      else interim = e.results[i][0].transcript;
-    }
-    ST.finalText = final;
-    document.getElementById('stt-final').textContent = final;
-    document.getElementById('stt-interim').textContent = interim;
-  };
-
-  r.onend = () => {
-    ST.isListening = false;
-    document.getElementById('mic-btn').classList.remove('listening');
-    document.getElementById('stt-box').classList.remove('listening');
-    document.getElementById('stt-dot').className = 'stt-dot';
-    document.getElementById('stt-cursor').style.display = 'none';
-    document.getElementById('stt-status').textContent = 'รอเริ่ม • กดปุ่มไมค์เพื่อพูด';
-    const txt = ST.finalText.trim();
-    if (txt) {
-      processInput(txt);
-      ST.finalText = '';
-      document.getElementById('stt-final').textContent = '';
-      document.getElementById('stt-interim').textContent = '';
-    } else {
-      setAvatar('idle');
-    }
-  };
-
-  r.onerror = e => { if (e.error !== 'no-speech') showToast('⚠️', 'STT: ' + e.error); };
-  return r;
-}
-
-function toggleMic() {
-  if (ST.isSpeaking) { stopAudio(); return; }
-  if (!ST.recognition) ST.recognition = setupSTT();
-  if (!ST.recognition) return;
-  if (ST.isListening) ST.recognition.stop();
-  else { ST.finalText = ''; ST.recognition.start(); }
-}
-
-// ============================================================
-// PROCESS INPUT → GEMINI → TTS
-// ============================================================
-async function processInput(text) {
-  addMsg('user', text);
-  saveKB(text);
-  sendN8N({ type: 'stt', text, session: CFG.sessionId, ts: new Date().toISOString() });
-  await geminiChat(text);
-}
-
-async function sendMessage() {
-  const el = document.getElementById('text-input');
-  const t = el.value.trim();
-  if (!t) return;
-  el.value = '';
-  await processInput(t);
-}
-
-// ============================================================
-// GEMINI CHAT
-// ============================================================
-async function fetchN8NContext() {
-  const base = getN8NBase();
-  if (!base) return null;
-  try {
-    const res = await fetch(`${base}/besties-kb?session=${CFG.sessionId}&limit=20`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.contextText || null;
-  } catch (e) {
-    console.warn('N8N context fetch:', e);
-    return null;
-  }
-}
-
-async function geminiChat(userText) {
-  const key = CFG.geminiKey || localStorage.getItem('gemini_key');
-  if (!key) { showToast('🔑', 'กรุณาใส่ Gemini API Key ในตั้งค่า'); return; }
-
-  setAvatar('thinking');
-  document.getElementById('stt-box').classList.add('processing');
-  document.getElementById('stt-dot').className = 'stt-dot processing';
-  document.getElementById('stt-status').textContent = 'Gemini กำลังคิด...';
-
-  const mode = document.getElementById('mode-select').value;
-  const sysPrompt = getPrompt(mode);
-
-  // ดึง context จาก n8n KB ก่อน ถ้าไม่มีใช้ memory ในหน้าแทน
-  const n8nContext = await fetchN8NContext();
-  const localContext = ST.kb.slice(-6).map(e => e.text).join('\n');
-  const contextText = n8nContext || localContext;
-
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${key}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: sysPrompt }] },
-          contents: [{
-            role: 'user',
-            parts: [{ text: `บริบท:\n${contextText}\n\nผู้ใช้: ${userText}` }]
-          }],
-          generationConfig: { temperature: 0.82 }
-        })
-      }
-    );
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error?.message || `HTTP ${res.status}`);
-    }
-
-    const data = await res.json();
-    const candidate = data.candidates?.[0];
-    const reply = candidate?.content?.parts?.[0]?.text;
-    if (!reply) throw new Error('ไม่ได้รับ response จาก Gemini');
-
-    // ถ้ายังถูกตัดอยู่ให้แจ้ง
-    if (candidate.finishReason === 'MAX_TOKENS') {
-      showToast('⚠️', 'ข้อความถูกตัดเนื่องจากยาวเกิน — ลองถามใหม่สั้นกว่านี้');
-    }
-
-    addMsg('ai', reply);
-    sendN8N({ type: 'ai_response', text: reply, session: CFG.sessionId });
-    await speakText(reply, key);
-
-  } catch (err) {
-    console.error('Gemini error:', err);
-    const errMsg = 'ขออภัยครับ เกิดข้อผิดพลาด: ' + err.message;
-    addMsg('ai', errMsg);
-    showToast('❌', err.message);
-    setAvatar('idle');
-  } finally {
-    document.getElementById('stt-box').classList.remove('processing');
-    document.getElementById('stt-dot').className = 'stt-dot';
-    document.getElementById('stt-status').textContent = 'รอเริ่ม • กดปุ่มไมค์เพื่อพูด';
-  }
-}
-
-function getPrompt(mode) {
-  const base = `คุณคือ Besties AI พิธีกรหนุ่มอายุ 18 ปี สำหรับงานประกวดไอเดียนวัตกรรม
-บุคลิก: มั่นใจ พูดเก่ง มีเสน่ห์ เป็นมิตร และมืออาชีพแบบวัยรุ่น
-ใช้สรรพนาม "ผม" แทนตัวเอง เรียกผู้เข้าแข่งขันว่า "คุณ" หรือเรียกชื่อถ้าทราบ
-พูดภาษาไทยเป็นธรรมชาติ กระชับ ฟังดูดี มีพลังงาน ไม่ทางการจนเกินไป`;
-  return {
-    interview: base + '\nถามคำถามดึงข้อมูลไอเดียให้ครบ: ปัญหาที่แก้ กลุ่มเป้าหมาย วิธีการ ความแตกต่าง',
-    pitch:     base + '\nฟัง Pitch แล้วให้ feedback สร้างสรรค์ ชี้จุดแข็งและโอกาสพัฒนา',
-    qa:        base + '\nตอบคำถามเกี่ยวกับเกณฑ์ประกวดและให้คำแนะนำ',
-    analyze:   base + '\nวิเคราะห์ตาม Innovation Canvas ให้คะแนนและเหตุผล'
-  }[mode] || base;
-}
-
-// ============================================================
-// GEMINI TTS
-// ============================================================
-async function speakText(text, key, loadingBtn = null) {
-  const apiKey = key || CFG.geminiKey || localStorage.getItem('gemini_key');
-  if (!apiKey) return;
-  const voice = document.getElementById('voice-select').value;
-
-  // --- loading state on button ---
-  let _btnSnapshot = null;
-  function setBtnLoading() {
-    if (!loadingBtn) return;
-    _btnSnapshot = { html: loadingBtn.innerHTML, disabled: loadingBtn.disabled };
-    loadingBtn.disabled = true;
-    loadingBtn.style.cursor = 'not-allowed';
-    loadingBtn.style.opacity = '0.65';
-    loadingBtn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> กำลังโหลด...`;
-  }
-  function restoreBtn() {
-    if (!loadingBtn || !_btnSnapshot) return;
-    loadingBtn.innerHTML = _btnSnapshot.html;
-    loadingBtn.disabled = _btnSnapshot.disabled;
-    loadingBtn.style.cursor = '';
-    loadingBtn.style.opacity = '';
-    _btnSnapshot = null;
-  }
-  setBtnLoading();
-
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text }] }],
-          generationConfig: {
-            responseModalities: ['AUDIO'],
-            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } }
-          }
-        })
-      }
-    );
-
-    if (!res.ok) {
-      const errBody = await res.json().catch(() => ({}));
-      throw new Error(errBody.error?.message || `TTS HTTP ${res.status}`);
-    }
-
-    const data = await res.json();
-    const audioB64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-    if (!audioB64) throw new Error('TTS ไม่ได้รับ audio data');
-
-    // decode PCM → WAV
-    const raw = atob(audioB64);
-    const bytes = new Uint8Array(raw.length);
-    for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
-    const wav = pcmToWav(bytes, 24000, 1, 16);
-    const blob = new Blob([wav], { type: 'audio/wav' });
-    const url = URL.createObjectURL(blob);
-
-    stopAudio();
-    const audio = new Audio(url);
-    ST.audio = audio;
-
-    audio.onplay  = () => { ST.isSpeaking = true; setAvatar('speaking'); restoreBtn(); };
-    audio.onended = () => { ST.isSpeaking = false; ST.audio = null; URL.revokeObjectURL(url); setAvatar('idle'); };
-    audio.onerror = (e) => {
-      console.error('Audio play error:', e);
-      ST.isSpeaking = false; ST.audio = null;
-      URL.revokeObjectURL(url);
-      setAvatar('idle');
-      restoreBtn();
-      showToast('⚠️', 'ไม่สามารถเล่นเสียงได้');
+  <script>
+    // ============================================================
+    // CONFIG & STATE
+    // ============================================================
+    const CFG = {
+      geminiKey: localStorage.getItem('gemini_key') || '',
+      n8nWebhook: localStorage.getItem('n8n_webhook') || '',
+      sessionId: 'SESSION-' + Math.floor(Math.random() * 9000 + 1000),
+      teamName: '',
+      contestant: 0
+    };
+    const ST = {
+      isListening: false,
+      isSpeaking: false,
+      recognition: null,
+      audio: null,
+      messages: [],
+      kb: [],
+      finalText: '',
     };
 
-    await audio.play();
+    document.getElementById('session-id').textContent = CFG.sessionId;
+    if (CFG.geminiKey) document.getElementById('gemini-key').value = CFG.geminiKey;
+    if (CFG.n8nWebhook) document.getElementById('n8n-webhook').value = CFG.n8nWebhook;
 
-  } catch (err) {
-    console.error('TTS error:', err);
-    restoreBtn();
-    showToast('⚠️', 'TTS: ' + err.message);
+    // ============================================================
+    // N8N URL HELPERS
+    // ============================================================
+    function getN8NBase() {
+      const wh = CFG.n8nWebhook;
+      if (!wh) return null;
+      return wh.replace(/\/$/, '').replace(/\/(besties-kb|besties-sessions|besties-analyze)$/, '');
+    }
 
-    // Fallback: Web Speech API
-    if ('speechSynthesis' in window) {
-      setAvatar('speaking');
-      ST.isSpeaking = true;
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = 'th-TH'; u.rate = 1.0;
-      u.onstart = () => setAvatar('speaking');
-      u.onend   = () => { ST.isSpeaking = false; setAvatar('idle'); };
-      u.onerror  = () => { ST.isSpeaking = false; setAvatar('idle'); };
-      speechSynthesis.speak(u);
-    } else {
+    function escHtml(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ============================================================
+    // AVATAR STATE
+    // ============================================================
+    function setAvatar(state) {
+      const bars = document.querySelectorAll('.wave-bar');
+      const wrapper = document.getElementById('avatar-wrapper');
+      const statusEl = document.getElementById('ai-status-text');
+      const taglineEl = document.getElementById('avatar-tagline');
+
+      bars.forEach(b => b.classList.remove('active'));
+      wrapper.classList.remove('speaking');
+
+      const cfg = {
+        speaking: { waves: true, ring: true, status: 'กำลังพูด...', tagline: 'กำลังตอบกลับ...' },
+        listening: { waves: false, ring: false, status: 'กำลังฟัง...', tagline: 'พูดได้เลยครับ' },
+        thinking: { waves: false, ring: false, status: 'กำลังคิด...', tagline: 'ประมวลผลอยู่...' },
+        idle: { waves: false, ring: false, status: 'พร้อมใช้งาน', tagline: 'กรรมการ AI สำหรับการประกวดไอเดีย' }
+      }[state] || { waves: false, ring: false, status: 'พร้อมใช้งาน', tagline: 'กรรมการ AI สำหรับการประกวดไอเดีย' };
+
+      if (cfg.waves) bars.forEach(b => b.classList.add('active'));
+      if (cfg.ring) wrapper.classList.add('speaking');
+      statusEl.textContent = cfg.status;
+      taglineEl.textContent = cfg.tagline;
+      document.getElementById('stop-speak-btn')?.classList.toggle('active', state === 'speaking');
+      dispBroadcast({ type: 'avatar', state, status: cfg.status, tagline: cfg.tagline });
+    }
+
+    // ============================================================
+    // STT — Web Speech API + auto-restart (ไม่หยุดเอง)
+    // ============================================================
+
+    function setListeningUI(on) {
+      document.getElementById('mic-btn').classList.toggle('listening', on);
+      document.getElementById('stt-box').classList.toggle('listening', on);
+      document.getElementById('stt-dot').className = 'stt-dot' + (on ? ' listening' : '');
+      document.getElementById('stt-status').textContent = on
+        ? 'กำลังฟัง... พูดได้เลยครับ'
+        : 'รอเริ่ม • กดปุ่มไมค์เพื่อพูด';
+      document.getElementById('stt-cursor').style.display = on ? 'inline-block' : 'none';
+      if (on) setAvatar('listening');
+    }
+
+    function buildSTT() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) { showToast('⚠️', 'กรุณาใช้ Chrome เพื่อใช้งานไมโครโฟน'); return null; }
+      const r = new SR();
+      r.lang = 'th-TH';
+      r.continuous = true;
+      r.interimResults = true;
+      r.maxAlternatives = 1;
+
+      r.onresult = e => {
+        let interim = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          if (e.results[i].isFinal) ST.finalText += e.results[i][0].transcript;
+          else interim = e.results[i][0].transcript;
+        }
+        document.getElementById('stt-final').textContent = ST.finalText;
+        document.getElementById('stt-interim').textContent = interim;
+      };
+
+      r.onend = () => {
+        // ถ้ายังกดไมค์อยู่ให้ restart อัตโนมัติ (ป้องกันหยุดกลางคัน)
+        if (ST.isListening) {
+          try { r.start(); } catch (_) { }
+        }
+      };
+
+      r.onerror = e => {
+        if (e.error === 'no-speech' || e.error === 'aborted') return;
+        console.warn('STT error:', e.error);
+        if (ST.isListening) setTimeout(() => { try { r.start(); } catch (_) { } }, 300);
+      };
+
+      return r;
+    }
+
+    function toggleMic() {
+      if (ST.isSpeaking) { stopAudio(); return; }
+
+      if (ST.isListening) {
+        // หยุดฟัง → ส่งข้อความสะสมไปประมวลผล
+        ST.isListening = false;
+        if (ST.recognition) { try { ST.recognition.stop(); } catch (_) { } }
+        setListeningUI(false);
+        const txt = ST.finalText.trim();
+        ST.finalText = '';
+        document.getElementById('stt-final').textContent = '';
+        document.getElementById('stt-interim').textContent = '';
+        if (txt) processInput(txt);
+        else setAvatar('idle');
+      } else {
+        // เริ่มฟัง
+        if (!ST.recognition) ST.recognition = buildSTT();
+        if (!ST.recognition) return;
+        ST.finalText = '';
+        document.getElementById('stt-final').textContent = '';
+        document.getElementById('stt-interim').textContent = '';
+        ST.isListening = true;
+        setListeningUI(true);
+        try { ST.recognition.start(); } catch (_) { }
+      }
+    }
+
+    // ============================================================
+    // PROCESS INPUT → GEMINI → TTS
+    // ============================================================
+    async function processInput(text) {
+      addMsg('user', text);
+      saveKB(text);
+      sendN8N({ type: 'stt', text, session: CFG.sessionId, ts: new Date().toISOString() });
+      await geminiChat(text);
+    }
+
+    async function sendMessage() {
+      const el = document.getElementById('text-input');
+      const t = el.value.trim();
+      if (!t) return;
+      el.value = '';
+      await processInput(t);
+    }
+
+    // ============================================================
+    // GEMINI CHAT
+    // ============================================================
+    async function fetchN8NContext() {
+      const base = getN8NBase();
+      if (!base) return null;
+      try {
+        const res = await fetch(`${base}/besties-kb?session=${CFG.sessionId}&limit=20`);
+        if (!res.ok) return null;
+        const data = await res.json();
+        return data.contextText || null;
+      } catch (e) {
+        console.warn('N8N context fetch:', e);
+        return null;
+      }
+    }
+
+    async function geminiChat(userText) {
+      const key = CFG.geminiKey || localStorage.getItem('gemini_key');
+      if (!key) { showToast('🔑', 'กรุณาใส่ Gemini API Key ในตั้งค่า'); return; }
+
+      setAvatar('thinking');
+      document.getElementById('stt-box').classList.add('processing');
+      document.getElementById('stt-dot').className = 'stt-dot processing';
+      document.getElementById('stt-status').textContent = 'Gemini กำลังคิด...';
+
+      const mode = document.getElementById('mode-select').value;
+      const sysPrompt = getPrompt(mode);
+
+      // ดึง context จาก n8n KB ก่อน ถ้าไม่มีใช้ memory ในหน้าแทน
+      const n8nContext = await fetchN8NContext();
+      const localContext = ST.kb.slice(-6).map(e => e.text).join('\n');
+      const juryContext = mode === 'analyze' ? await fetchJuryScores() : '';
+      const contextText = (n8nContext || localContext) + juryContext;
+
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${key}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: sysPrompt }] },
+              contents: [{
+                role: 'user',
+                parts: [{ text: `บริบท:\n${contextText}\n\nผู้ใช้: ${userText}` }]
+              }],
+              generationConfig: { temperature: mode === 'analyze' ? 0.65 : 0.82 }
+            })
+          }
+        );
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error?.message || `HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        const candidate = data.candidates?.[0];
+        const reply = candidate?.content?.parts?.[0]?.text;
+        if (!reply) throw new Error('ไม่ได้รับ response จาก Gemini');
+
+        // ถ้ายังถูกตัดอยู่ให้แจ้ง
+        if (candidate.finishReason === 'MAX_TOKENS') {
+          showToast('⚠️', 'ข้อความถูกตัดเนื่องจากยาวเกิน — ลองถามใหม่สั้นกว่านี้');
+        }
+
+        addMsg('ai', reply);
+        sendN8N({ type: 'ai_response', text: reply, session: CFG.sessionId });
+        await speakText(reply, key);
+
+      } catch (err) {
+        console.error('Gemini error:', err);
+        const errMsg = 'ขออภัยครับ เกิดข้อผิดพลาด: ' + err.message;
+        addMsg('ai', errMsg);
+        showToast('❌', err.message);
+        setAvatar('idle');
+      } finally {
+        document.getElementById('stt-box').classList.remove('processing');
+        document.getElementById('stt-dot').className = 'stt-dot';
+        document.getElementById('stt-status').textContent = 'รอเริ่ม • กดปุ่มไมค์เพื่อพูด';
+      }
+    }
+
+    const BESTIE_BASE = `คุณคือ "Besties" AI พิธีกรดิจิทัลสำหรับงานประกวดไอเดียนวัตกรรม
+บุคลิก: หนุ่มอายุ 18 ปี มั่นใจ ทันสมัย เป็นมิตร มีพลังงาน ไม่ทางการจนเกินไป
+ใช้สรรพนาม "ผม" เรียกผู้เข้าแข่งขันว่า "คุณ" หรือชื่อทีมถ้าทราบ
+พูดภาษาไทยกระชับ เป็นธรรมชาติ ห้ามตอบยาวเกิน 5 ประโยค`;
+
+    const DEFAULT_PROMPTS = {
+      pitch: BESTIE_BASE + `
+
+[Model A — Presentation Analyst]
+ฟังการนำเสนอจากผู้เข้าแข่งขัน สรุปเนื้อหาสำคัญ และประเมินเบื้องต้นตามเกณฑ์ 5 ข้อ:
+1. Business Impact — ผลกระทบทางธุรกิจและความคุ้มค่า (0-10)
+2. AI Fit — ความเหมาะสมในการนำ AI มาแก้ปัญหานี้ (0-10)
+3. Feasibility — ความเป็นไปได้ในการพัฒนาจริง (0-10)
+4. Adoption — โอกาสที่ผู้ใช้จะยอมรับและใช้งาน (0-10)
+5. Risk — ความเสี่ยงด้านข้อมูล ความปลอดภัย และจริยธรรม (0-10)
+ชี้จุดเด่นของโครงการ พูดเชิงบวกและให้กำลังใจ ไม่ต้องให้คะแนนออกมาตรง ๆ`,
+
+      qa: BESTIE_BASE + `
+
+[Model B — Smart Interrogator]
+วิเคราะห์ช่องว่างในโครงการที่ยังไม่ชัดเจน แล้วตั้งคำถามเจาะลึก 1-2 ข้อที่ท้าทายแต่สร้างสรรค์
+เน้นประเด็น: ความพร้อมของข้อมูล (Data Readiness), ความสามารถขยายระบบ (Scalability), ความเหมาะสมของ AI
+คำถามต้องชัด กระชับ เข้าใจง่าย เพื่อให้ผู้เข้าแข่งขันได้แสดงศักยภาพเพิ่มเติม
+ถามตรง ๆ ได้เลย ไม่ต้องชมก่อน ไม่ต้องให้คำตอบเอง`,
+
+      analyze: BESTIE_BASE + `
+
+[Model C — Feedback Harmonizer]
+รวบรวมข้อมูลการนำเสนอและการซักถามทั้งหมด แล้วสังเคราะห์เป็น Constructive Feedback เชิงบวก
+เน้นชื่นชมความพยายาม ชี้จุดแข็งที่น่าประทับใจ และแนะนำโอกาสพัฒนาที่ทำได้จริง
+ปรับคำวิจารณ์รุนแรงให้กลายเป็นคำแนะนำที่นำไปใช้ต่อได้ ไม่พูดถึงคะแนนตรง ๆ
+ท้ายสุดให้กำลังใจทีม พร้อมส่งไม้ต่อให้ทีมถัดไป`
+    };
+
+    function getPrompt(mode) {
+      const saved = localStorage.getItem('prompt_' + mode);
+      return saved || DEFAULT_PROMPTS[mode] || BESTIE_BASE;
+    }
+
+    function savePrompts() {
+      ['pitch', 'qa', 'analyze', 'interview'].forEach(m => {
+        const el = document.getElementById('prompt-editor-' + m);
+        if (el) localStorage.setItem('prompt_' + m, el.value);
+      });
+      showToast('💾', 'บันทึก Prompt เรียบร้อยแล้ว');
+    }
+
+    function resetPrompts() {
+      ['pitch', 'qa', 'analyze', 'interview'].forEach(m => {
+        localStorage.removeItem('prompt_' + m);
+        const el = document.getElementById('prompt-editor-' + m);
+        if (el) el.value = DEFAULT_PROMPTS[m];
+      });
+      showToast('↺', 'รีเซ็ต Prompt เป็นค่าเริ่มต้นแล้ว');
+    }
+
+    function togglePromptEditor() {
+      const panel = document.getElementById('prompt-editor-panel');
+      const btn = document.getElementById('prompt-editor-toggle');
+      const isOpen = panel.style.display !== 'none';
+      panel.style.display = isOpen ? 'none' : 'block';
+      btn.textContent = isOpen ? 'เปิด' : 'ปิด';
+      if (!isOpen) {
+        ['pitch', 'qa', 'analyze', 'interview'].forEach(m => {
+          const el = document.getElementById('prompt-editor-' + m);
+          if (el) el.value = localStorage.getItem('prompt_' + m) || DEFAULT_PROMPTS[m];
+        });
+      }
+    }
+
+    // ============================================================
+    // GEMINI TTS
+    // ============================================================
+    async function speakText(text, key, loadingBtn = null) {
+      const apiKey = key || CFG.geminiKey || localStorage.getItem('gemini_key');
+      if (!apiKey) return;
+      const voice = document.getElementById('voice-select').value;
+
+      // --- loading state on button ---
+      let _btnSnapshot = null;
+      function setBtnLoading() {
+        if (!loadingBtn) return;
+        _btnSnapshot = { html: loadingBtn.innerHTML, disabled: loadingBtn.disabled };
+        loadingBtn.disabled = true;
+        loadingBtn.style.cursor = 'not-allowed';
+        loadingBtn.style.opacity = '0.65';
+        loadingBtn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> กำลังโหลด...`;
+      }
+      function restoreBtn() {
+        if (!loadingBtn || !_btnSnapshot) return;
+        loadingBtn.innerHTML = _btnSnapshot.html;
+        loadingBtn.disabled = _btnSnapshot.disabled;
+        loadingBtn.style.cursor = '';
+        loadingBtn.style.opacity = '';
+        _btnSnapshot = null;
+      }
+      setBtnLoading();
+
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text }] }],
+              generationConfig: {
+                responseModalities: ['AUDIO'],
+                speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } }
+              }
+            })
+          }
+        );
+
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          throw new Error(errBody.error?.message || `TTS HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        const audioB64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+        if (!audioB64) throw new Error('TTS ไม่ได้รับ audio data');
+
+        // decode PCM → WAV
+        const raw = atob(audioB64);
+        const bytes = new Uint8Array(raw.length);
+        for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+        const wav = pcmToWav(bytes, 24000, 1, 16);
+        const blob = new Blob([wav], { type: 'audio/wav' });
+        const url = URL.createObjectURL(blob);
+
+        stopAudio();
+        const audio = new Audio(url);
+        ST.audio = audio;
+
+        audio.onplay = () => { ST.isSpeaking = true; setAvatar('speaking'); restoreBtn(); };
+        audio.onended = () => { ST.isSpeaking = false; ST.audio = null; URL.revokeObjectURL(url); setAvatar('idle'); };
+        audio.onerror = (e) => {
+          console.error('Audio play error:', e);
+          ST.isSpeaking = false; ST.audio = null;
+          URL.revokeObjectURL(url);
+          setAvatar('idle');
+          restoreBtn();
+          showToast('⚠️', 'ไม่สามารถเล่นเสียงได้');
+        };
+
+        await audio.play();
+
+      } catch (err) {
+        console.error('TTS error:', err);
+        restoreBtn();
+        showToast('⚠️', 'TTS: ' + err.message);
+
+        // Fallback: Web Speech API
+        if ('speechSynthesis' in window) {
+          setAvatar('speaking');
+          ST.isSpeaking = true;
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = 'th-TH'; u.rate = 1.0;
+          u.onstart = () => setAvatar('speaking');
+          u.onend = () => { ST.isSpeaking = false; setAvatar('idle'); };
+          u.onerror = () => { ST.isSpeaking = false; setAvatar('idle'); };
+          speechSynthesis.speak(u);
+        } else {
+          setAvatar('idle');
+        }
+      }
+    }
+
+    function pcmToWav(pcm, sr, ch, bd) {
+      const dl = pcm.length;
+      const buf = new ArrayBuffer(44 + dl);
+      const v = new DataView(buf);
+      const ws = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+      ws(0, 'RIFF'); v.setUint32(4, 36 + dl, true); ws(8, 'WAVE'); ws(12, 'fmt ');
+      v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, ch, true);
+      v.setUint32(24, sr, true); v.setUint32(28, sr * ch * (bd / 8), true);
+      v.setUint16(32, ch * (bd / 8), true); v.setUint16(34, bd, true);
+      ws(36, 'data'); v.setUint32(40, dl, true);
+      new Uint8Array(buf, 44).set(pcm);
+      return buf;
+    }
+
+    function stopAudio() {
+      if (ST.audio) { ST.audio.pause(); ST.audio = null; }
+      if ('speechSynthesis' in window) speechSynthesis.cancel();
+      ST.isSpeaking = false;
       setAvatar('idle');
     }
-  }
-}
 
-function pcmToWav(pcm, sr, ch, bd) {
-  const dl = pcm.length;
-  const buf = new ArrayBuffer(44 + dl);
-  const v = new DataView(buf);
-  const ws = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o+i, s.charCodeAt(i)); };
-  ws(0,'RIFF'); v.setUint32(4,36+dl,true); ws(8,'WAVE'); ws(12,'fmt ');
-  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,ch,true);
-  v.setUint32(24,sr,true); v.setUint32(28,sr*ch*(bd/8),true);
-  v.setUint16(32,ch*(bd/8),true); v.setUint16(34,bd,true);
-  ws(36,'data'); v.setUint32(40,dl,true);
-  new Uint8Array(buf,44).set(pcm);
-  return buf;
-}
+    // ============================================================
+    // MESSAGES UI
+    // ============================================================
+    function addMsg(role, text) {
+      const list = document.getElementById('messages-list');
+      const time = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+      const div = document.createElement('div');
+      div.className = `msg ${role}`;
+      const kbBadge = role === 'user' ? `<div style="margin-top:6px;"><span class="kb-tag"><span class="kb-tag-dot"></span>บันทึกแล้ว</span></div>` : '';
 
-function stopAudio() {
-  if (ST.audio) { ST.audio.pause(); ST.audio = null; }
-  if ('speechSynthesis' in window) speechSynthesis.cancel();
-  ST.isSpeaking = false;
-  setAvatar('idle');
-}
-
-// ============================================================
-// MESSAGES UI
-// ============================================================
-function addMsg(role, text) {
-  const list = document.getElementById('messages-list');
-  const time = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-  const div = document.createElement('div');
-  div.className = `msg ${role}`;
-  const kbBadge = role === 'user' ? `<div style="margin-top:6px;"><span class="kb-tag"><span class="kb-tag-dot"></span>บันทึกแล้ว</span></div>` : '';
-
-  if (role === 'ai') {
-    const msgId = 'msg-' + Date.now();
-    div.innerHTML = `
+      if (role === 'ai') {
+        const msgId = 'msg-' + Date.now();
+        div.innerHTML = `
       <div class="msg-avatar ai"><img src="Besties.png" alt="AI" onerror="this.parentElement.textContent='B'"></div>
       <div>
         <div class="msg-bubble" id="${msgId}">${text}</div>
@@ -896,217 +2203,218 @@ function addMsg(role, text) {
           </button>
         </div>
       </div>`;
-  } else {
-    div.innerHTML = `
+      } else {
+        div.innerHTML = `
       <div class="msg-avatar user">${CFG.contestant}</div>
       <div><div class="msg-bubble">${text}</div>${kbBadge}<div class="msg-time">${time}</div></div>`;
-  }
-  list.appendChild(div);
-  ST.messages.push({ role, text, time });
-  setTimeout(() => div.scrollIntoView({ behavior: 'smooth', block: 'end' }), 50);
-}
+      }
+      list.appendChild(div);
+      ST.messages.push({ role, text, time });
+      setTimeout(() => div.scrollIntoView({ behavior: 'smooth', block: 'end' }), 50);
+    }
 
-// ============================================================
-// KNOWLEDGE BASE
-// ============================================================
-function saveKB(text) {
-  const kw = ['ไอเดีย','นวัตกรรม','ปัญหา','กลุ่มเป้าหมาย','ตลาด','รายได้','ต้นทุน','เทคโนโลยี','AI','แอป','แพลตฟอร์ม'];
-  ST.kb.push({ text, contestant: CFG.contestant, ts: new Date().toISOString(), tags: kw.filter(k => text.includes(k)).slice(0,3) });
-  renderKB();
-}
+    // ============================================================
+    // KNOWLEDGE BASE
+    // ============================================================
+    function saveKB(text) {
+      const kw = ['ไอเดีย', 'นวัตกรรม', 'ปัญหา', 'กลุ่มเป้าหมาย', 'ตลาด', 'รายได้', 'ต้นทุน', 'เทคโนโลยี', 'AI', 'แอป', 'แพลตฟอร์ม'];
+      ST.kb.push({ text, contestant: CFG.contestant, ts: new Date().toISOString(), tags: kw.filter(k => text.includes(k)).slice(0, 3) });
+      renderKB();
+    }
 
-function renderKB() {
-  const c = document.getElementById('kb-entries');
-  if (!ST.kb.length) { c.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:1.5rem 0;">ยังไม่มีข้อมูล</div>'; return; }
-  c.innerHTML = ST.kb.slice().reverse().map(e => `
+    function renderKB() {
+      const c = document.getElementById('kb-entries');
+      if (!ST.kb.length) { c.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:1.5rem 0;">ยังไม่มีข้อมูล</div>'; return; }
+      c.innerHTML = ST.kb.slice().reverse().map(e => `
     <div class="kb-entry">
-      <div class="kb-entry-user">👤 ผู้แข่งขัน ${e.contestant} • ${new Date(e.ts).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}</div>
-      <div class="kb-entry-text">${e.text.substring(0,120)}${e.text.length>120?'...':''}</div>
-      ${e.tags.length ? `<div class="kb-entry-tags">${e.tags.map(t=>`<span class="kb-chip">${t}</span>`).join('')}</div>` : ''}
+      <div class="kb-entry-user">👤 ผู้แข่งขัน ${e.contestant} • ${new Date(e.ts).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}</div>
+      <div class="kb-entry-text">${e.text.substring(0, 120)}${e.text.length > 120 ? '...' : ''}</div>
+      ${e.tags.length ? `<div class="kb-entry-tags">${e.tags.map(t => `<span class="kb-chip">${t}</span>`).join('')}</div>` : ''}
     </div>`).join('');
-}
+    }
 
-// ============================================================
-// N8N
-// ============================================================
-async function sendN8N(payload) {
-  const base = getN8NBase();
-  if (!base) return;
-  try {
-    await fetch(`${base}/besties-kb`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-  } catch(e) { console.warn('N8N save:', e); }
-}
+    // ============================================================
+    // N8N
+    // ============================================================
+    async function sendN8N(payload) {
+      const base = getN8NBase();
+      if (!base) return;
+      try {
+        await fetch(`${base}/besties-kb`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      } catch (e) { console.warn('N8N save:', e); }
+    }
 
-async function registerSession(sessionId, teamName) {
-  const base = getN8NBase();
-  if (!base) return;
-  try {
-    await fetch(`${base}/besties-sessions`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ session: sessionId, teamName })
-    });
-  } catch(e) { console.warn('registerSession:', e); }
-}
+    async function registerSession(sessionId, teamName) {
+      const base = getN8NBase();
+      if (!base) return;
+      try {
+        await fetch(`${base}/besties-sessions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session: sessionId, teamName })
+        });
+      } catch (e) { console.warn('registerSession:', e); }
+    }
 
-async function listSessions() {
-  const base = getN8NBase();
-  if (!base) { showToast('⚠️', 'กรุณาตั้งค่า N8N URL ก่อน'); return; }
-  const btn = document.querySelector('#sessions-list-panel').previousElementSibling?.querySelector('button');
-  if (btn) btn.textContent = '...';
-  try {
-    const res = await fetch(`${base}/besties-sessions`);
-    const data = await res.json();
-    renderSessionsList(data.sessions || []);
-  } catch(e) {
-    showToast('❌', 'โหลด sessions ไม่ได้');
-    document.getElementById('sessions-list-panel').innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:1rem 0;">โหลดไม่สำเร็จ</div>';
-  } finally {
-    if (btn) btn.textContent = 'โหลด';
-  }
-}
+    async function listSessions() {
+      const base = getN8NBase();
+      if (!base) { showToast('⚠️', 'กรุณาตั้งค่า N8N URL ก่อน'); return; }
+      const btn = document.querySelector('#sessions-list-panel').previousElementSibling?.querySelector('button');
+      if (btn) btn.textContent = '...';
+      try {
+        const res = await fetch(`${base}/besties-sessions`);
+        const data = await res.json();
+        renderSessionsList(data.sessions || []);
+      } catch (e) {
+        showToast('❌', 'โหลด sessions ไม่ได้');
+        document.getElementById('sessions-list-panel').innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:1rem 0;">โหลดไม่สำเร็จ</div>';
+      } finally {
+        if (btn) btn.textContent = 'โหลด';
+      }
+    }
 
-function renderSessionsList(sessions) {
-  const el = document.getElementById('sessions-list-panel');
-  if (!sessions.length) {
-    el.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:1rem 0;">ยังไม่มี session</div>';
-    return;
-  }
-  el.innerHTML = sessions.map(s => `
+    function renderSessionsList(sessions) {
+      const el = document.getElementById('sessions-list-panel');
+      if (!sessions.length) {
+        el.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:1rem 0;">ยังไม่มี session</div>';
+        return;
+      }
+      el.innerHTML = sessions.map(s => `
     <div class="session-item ${s.session === CFG.sessionId ? 'active' : ''}"
       onclick="loadSession('${escHtml(s.session)}','${escHtml(s.teamName || '')}')">
       <div style="font-size:13px;font-weight:600;color:var(--text);">${escHtml(s.teamName || 'ไม่ระบุชื่อ')}</div>
       <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);margin-top:2px;">${escHtml(s.session)}</div>
       <div style="font-size:10px;color:var(--text3);margin-top:2px;">${s.createdAt ? new Date(s.createdAt).toLocaleString('th-TH') : ''}</div>
     </div>`).join('');
-}
-
-function loadSession(sessionId, teamName) {
-  if (!confirm(`สลับไปดู session ของทีม "${teamName}"?`)) return;
-  CFG.sessionId = sessionId;
-  CFG.teamName = teamName;
-  document.getElementById('session-id').textContent = sessionId;
-  document.getElementById('team-badge').textContent = teamName || 'LIVE SESSION';
-  document.getElementById('contestant-name').textContent = `ทีม: ${teamName}`;
-  ST.kb = []; ST.messages = [];
-  document.getElementById('messages-list').innerHTML = '';
-  renderKB();
-  showToast('✅', `โหลด session: ${teamName}`);
-  toggleKB();
-}
-
-// ============================================================
-// ACTIONS
-// ============================================================
-function newContestant() {
-  showSessionModal();
-}
-
-function showSessionModal() {
-  const newId = 'SESSION-' + Math.floor(Math.random()*9000+1000);
-  document.getElementById('new-session-id-preview').textContent = newId;
-  document.getElementById('new-team-name').value = '';
-  document.getElementById('session-overlay').dataset.pendingId = newId;
-  document.getElementById('session-overlay').classList.add('show');
-  setTimeout(() => document.getElementById('new-team-name').focus(), 150);
-}
-
-function closeSessionModal() {
-  document.getElementById('session-overlay').classList.remove('show');
-}
-
-function startSession() {
-  const nameInput = document.getElementById('new-team-name').value.trim();
-  const teamName = nameInput || `ผู้แข่งขัน ${CFG.contestant + 1}`;
-  const newId = document.getElementById('session-overlay').dataset.pendingId;
-
-  CFG.sessionId = newId;
-  CFG.teamName  = teamName;
-  CFG.contestant++;
-
-  document.getElementById('session-id').textContent   = newId;
-  document.getElementById('team-badge').textContent   = teamName;
-  document.getElementById('contestant-name').textContent = `ทีม: ${teamName}`;
-  document.getElementById('session-meta').textContent = `Session: ${newId} • บันทึกอัตโนมัติ`;
-
-  ST.kb = []; ST.messages = [];
-  document.getElementById('messages-list').innerHTML = '';
-  renderKB();
-  closeSessionModal();
-
-  registerSession(newId, teamName);
-  dispBroadcast({ type: 'session', sessionId: newId, teamName });
-
-  const welcome = `ยินดีต้อนรับทีม ${teamName} ครับ! 🎉 พร้อมแล้ว กรุณาแนะนำตัวและนำเสนอไอเดียได้เลยนะครับ`;
-  addMsg('ai', welcome);
-  const k = CFG.geminiKey || localStorage.getItem('gemini_key');
-  if (k) speakText(welcome, k);
-  showToast('✅', `เริ่ม session: ${teamName}`);
-}
-
-async function analyzeIdea() {
-  const key = CFG.geminiKey || localStorage.getItem('gemini_key');
-  if (!key) { showToast('🔑', 'กรุณาใส่ Gemini API Key'); return; }
-  const base = getN8NBase();
-  if (base) {
-    await analyzeViaN8N(key, base);
-  } else {
-    await analyzeDirectGemini(key);
-  }
-}
-
-async function analyzeViaN8N(key, base) {
-  if (!CFG.teamName) { showToast('⚠️', 'กรุณาตั้งชื่อทีมก่อน (กด + ทีมใหม่)'); return; }
-  setAvatar('thinking');
-  showToast('🔄', 'กำลังวิเคราะห์...');
-  try {
-    const res = await fetch(`${base}/besties-analyze`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ session: CFG.sessionId, teamName: CFG.teamName, apiKey: key })
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(()=>({}));
-      throw new Error(err.error?.message || `HTTP ${res.status}`);
     }
-    const data = await res.json();
-    addAnalysisMsg(data);
-    const summary = `คะแนนรวมทีม ${data.teamName} ได้ ${data.totalScore} คะแนนจาก 100 คะแนนครับ ${data.summary}`;
-    await speakText(summary, key);
-  } catch(err) {
-    showToast('❌', err.message);
-    addMsg('ai', 'วิเคราะห์ไม่สำเร็จ: ' + err.message);
-    setAvatar('idle');
-  }
-}
 
-async function analyzeDirectGemini(key) {
-  const text = ST.kb.map(e=>e.text).join('\n');
-  if (!text) { showToast('⚠️', 'ยังไม่มีข้อมูล'); return; }
-  setAvatar('thinking');
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${key}`,
-      { method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ contents:[{parts:[{text:`วิเคราะห์ไอเดียต่อไปนี้แบบกรรมการประกวด ให้คะแนน 1-10 (นวัตกรรม, ความเป็นไปได้, ผลกระทบ) สรุปจุดเด่น-จุดด้อย:\n\n${text}`}]}], generationConfig:{temperature:0.7} })
+    function loadSession(sessionId, teamName) {
+      if (!confirm(`สลับไปดู session ของทีม "${teamName}"?`)) return;
+      CFG.sessionId = sessionId;
+      CFG.teamName = teamName;
+      document.getElementById('session-id').textContent = sessionId;
+      document.getElementById('team-badge').textContent = teamName || 'LIVE SESSION';
+      document.getElementById('contestant-name').textContent = `ทีม: ${teamName}`;
+      ST.kb = []; ST.messages = [];
+      document.getElementById('messages-list').innerHTML = '';
+      renderKB();
+      showToast('✅', `โหลด session: ${teamName}`);
+      toggleKB();
+    }
+
+    // ============================================================
+    // ACTIONS
+    // ============================================================
+    function newContestant() {
+      showSessionModal();
+    }
+
+    function showSessionModal() {
+      const newId = 'SESSION-' + Math.floor(Math.random() * 9000 + 1000);
+      document.getElementById('new-session-id-preview').textContent = newId;
+      document.getElementById('new-team-name').value = '';
+      document.getElementById('session-overlay').dataset.pendingId = newId;
+      document.getElementById('session-overlay').classList.add('show');
+      setTimeout(() => document.getElementById('new-team-name').focus(), 150);
+    }
+
+    function closeSessionModal() {
+      document.getElementById('session-overlay').classList.remove('show');
+    }
+
+    function startSession() {
+      const nameInput = document.getElementById('new-team-name').value.trim();
+      const teamName = nameInput || `ผู้แข่งขัน ${CFG.contestant + 1}`;
+      const newId = document.getElementById('session-overlay').dataset.pendingId;
+
+      CFG.sessionId = newId;
+      CFG.teamName = teamName;
+      CFG.contestant++;
+
+      document.getElementById('session-id').textContent = newId;
+      document.getElementById('team-badge').textContent = teamName;
+      document.getElementById('contestant-name').textContent = `ทีม: ${teamName}`;
+      document.getElementById('session-meta').textContent = `Session: ${newId} • บันทึกอัตโนมัติ`;
+
+      ST.kb = []; ST.messages = [];
+      document.getElementById('messages-list').innerHTML = '';
+      renderKB();
+      closeSessionModal();
+
+      registerSession(newId, teamName);
+      dispBroadcast({ type: 'session', sessionId: newId, teamName });
+
+      const welcome = `ยินดีต้อนรับทีม ${teamName} ครับ! 🎉 พร้อมแล้ว กรุณาแนะนำตัวและนำเสนอไอเดียได้เลยนะครับ`;
+      addMsg('ai', welcome);
+      const k = CFG.geminiKey || localStorage.getItem('gemini_key');
+      if (k) speakText(welcome, k);
+      showToast('✅', `เริ่ม session: ${teamName}`);
+    }
+
+    async function analyzeIdea() {
+      const key = CFG.geminiKey || localStorage.getItem('gemini_key');
+      if (!key) { showToast('🔑', 'กรุณาใส่ Gemini API Key'); return; }
+      const base = getN8NBase();
+      if (base) {
+        await analyzeViaN8N(key, base);
+      } else {
+        await analyzeDirectGemini(key);
       }
-    );
-    const data = await res.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'ไม่สามารถวิเคราะห์ได้';
-    addMsg('ai', '📊 ผลการวิเคราะห์:\n\n' + reply);
-    await speakText('ผลการวิเคราะห์ไอเดียมีดังนี้ครับ ' + reply.substring(0,200), key);
-  } catch(err) { addMsg('ai', 'เกิดข้อผิดพลาด: ' + err.message); setAvatar('idle'); }
-}
+    }
 
-function addAnalysisMsg(data) {
-  const list = document.getElementById('messages-list');
-  const time = new Date().toLocaleTimeString('th-TH', {hour:'2-digit',minute:'2-digit'});
-  const score = data.totalScore || 0;
-  const scoreColor = score >= 80 ? '#4CAF50' : score >= 60 ? 'var(--yellow)' : 'var(--orange)';
-  const b = data.breakdown || {};
-  const div = document.createElement('div');
-  div.className = 'msg ai';
-  div.innerHTML = `
+    async function analyzeViaN8N(key, base) {
+      if (!CFG.teamName) { showToast('⚠️', 'กรุณาตั้งชื่อทีมก่อน (กด + ทีมใหม่)'); return; }
+      setAvatar('thinking');
+      showToast('🔄', 'กำลังวิเคราะห์...');
+      try {
+        const res = await fetch(`${base}/besties-analyze`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session: CFG.sessionId, teamName: CFG.teamName, apiKey: key })
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error?.message || `HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        addAnalysisMsg(data);
+        const summary = `คะแนนรวมทีม ${data.teamName} ได้ ${data.totalScore} คะแนนจาก 100 คะแนนครับ ${data.summary}`;
+        await speakText(summary, key);
+      } catch (err) {
+        showToast('❌', err.message);
+        addMsg('ai', 'วิเคราะห์ไม่สำเร็จ: ' + err.message);
+        setAvatar('idle');
+      }
+    }
+
+    async function analyzeDirectGemini(key) {
+      const text = ST.kb.map(e => e.text).join('\n');
+      if (!text) { showToast('⚠️', 'ยังไม่มีข้อมูล'); return; }
+      setAvatar('thinking');
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${key}`,
+          {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: `วิเคราะห์ไอเดียต่อไปนี้แบบกรรมการประกวด ให้คะแนน 1-10 (นวัตกรรม, ความเป็นไปได้, ผลกระทบ) สรุปจุดเด่น-จุดด้อย:\n\n${text}` }] }], generationConfig: { temperature: 0.7 } })
+          }
+        );
+        const data = await res.json();
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'ไม่สามารถวิเคราะห์ได้';
+        addMsg('ai', '📊 ผลการวิเคราะห์:\n\n' + reply);
+        await speakText('ผลการวิเคราะห์ไอเดียมีดังนี้ครับ ' + reply.substring(0, 200), key);
+      } catch (err) { addMsg('ai', 'เกิดข้อผิดพลาด: ' + err.message); setAvatar('idle'); }
+    }
+
+    function addAnalysisMsg(data) {
+      const list = document.getElementById('messages-list');
+      const time = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+      const score = data.totalScore || 0;
+      const scoreColor = score >= 80 ? '#4CAF50' : score >= 60 ? 'var(--yellow)' : 'var(--orange)';
+      const b = data.breakdown || {};
+      const div = document.createElement('div');
+      div.className = 'msg ai';
+      div.innerHTML = `
     <div class="msg-avatar ai"><img src="Besties.png" alt="AI" onerror="this.parentElement.textContent='B'"></div>
     <div style="max-width:85%;">
       <div style="display:inline-block;background:rgba(45,122,58,0.15);border:1px solid rgba(45,122,58,0.3);color:var(--green);font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;margin-bottom:6px;letter-spacing:0.4px;">📊 ANALYSIS RESULT</div>
@@ -1115,275 +2423,347 @@ function addAnalysisMsg(data) {
           <div><div class="score-label">ทีม</div><div style="color:white;font-weight:600;font-size:15px;margin-top:2px;">${escHtml(data.teamName)}</div></div>
           <div style="text-align:right;"><div class="score-total" style="color:${scoreColor};">${score}</div><div class="score-label">/ 100 คะแนน</div></div>
         </div>
-        ${scoreRow('ความคิดสร้างสรรค์', b.creativity||0, 25)}
-        ${scoreRow('ความเป็นไปได้', b.feasibility||0, 25)}
-        ${scoreRow('ความชัดเจน', b.clarity||0, 25)}
-        ${scoreRow('ผลกระทบ', b.impact||0, 25)}
-        <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1);font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;">${escHtml(data.summary||'')}</div>
-        ${(data.strengths||[]).length ? `<div style="margin-top:10px;"><div class="score-label" style="margin-bottom:4px;">จุดเด่น</div>${(data.strengths).map(s=>`<div style="font-size:12px;color:rgba(255,255,255,0.7);padding:2px 0;">• ${escHtml(s)}</div>`).join('')}</div>` : ''}
-        ${(data.improvements||[]).length ? `<div style="margin-top:8px;"><div class="score-label" style="margin-bottom:4px;">ข้อควรปรับปรุง</div>${(data.improvements).map(s=>`<div style="font-size:12px;color:rgba(255,255,255,0.7);padding:2px 0;">• ${escHtml(s)}</div>`).join('')}</div>` : ''}
+        ${scoreRow('ความคิดสร้างสรรค์', b.creativity || 0, 25)}
+        ${scoreRow('ความเป็นไปได้', b.feasibility || 0, 25)}
+        ${scoreRow('ความชัดเจน', b.clarity || 0, 25)}
+        ${scoreRow('ผลกระทบ', b.impact || 0, 25)}
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1);font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;">${escHtml(data.summary || '')}</div>
+        ${(data.strengths || []).length ? `<div style="margin-top:10px;"><div class="score-label" style="margin-bottom:4px;">จุดเด่น</div>${(data.strengths).map(s => `<div style="font-size:12px;color:rgba(255,255,255,0.7);padding:2px 0;">• ${escHtml(s)}</div>`).join('')}</div>` : ''}
+        ${(data.improvements || []).length ? `<div style="margin-top:8px;"><div class="score-label" style="margin-bottom:4px;">ข้อควรปรับปรุง</div>${(data.improvements).map(s => `<div style="font-size:12px;color:rgba(255,255,255,0.7);padding:2px 0;">• ${escHtml(s)}</div>`).join('')}</div>` : ''}
       </div>
       <div class="msg-time">${time}</div>
     </div>`;
-  list.appendChild(div);
-  setTimeout(() => div.scrollIntoView({behavior:'smooth',block:'end'}), 50);
-  dispBroadcast({ type: 'score', data });
-}
+      list.appendChild(div);
+      setTimeout(() => div.scrollIntoView({ behavior: 'smooth', block: 'end' }), 50);
+      dispBroadcast({ type: 'score', data });
+    }
 
-function scoreRow(label, val, max) {
-  const pct = Math.round((val/max)*100);
-  return `<div class="score-row">
+    function scoreRow(label, val, max) {
+      const pct = Math.round((val / max) * 100);
+      return `<div class="score-row">
     <span style="color:rgba(255,255,255,0.55);min-width:110px;">${label}</span>
     <div class="score-bar-wrap"><div class="score-bar-fill" style="width:${pct}%"></div></div>
     <span class="score-val">${val}/${max}</span>
   </div>`;
-}
+    }
 
-function speakLast(btn) {
-  const ai = ST.messages.filter(m=>m.role==='ai');
-  if (!ai.length) return;
-  const k = CFG.geminiKey || localStorage.getItem('gemini_key');
-  if (k) speakText(ai[ai.length-1].text, k, btn || null);
-}
+    function speakLast(btn) {
+      const ai = ST.messages.filter(m => m.role === 'ai');
+      if (!ai.length) return;
+      const k = CFG.geminiKey || localStorage.getItem('gemini_key');
+      if (k) speakText(ai[ai.length - 1].text, k, btn || null);
+    }
 
-function clearSession() {
-  if (!confirm('ล้างบทสนทนาทั้งหมด?')) return;
-  document.getElementById('messages-list').innerHTML = '';
-  ST.messages = []; ST.kb = [];
-  stopAudio(); renderKB();
-  addMsg('ai', 'ล้างข้อมูลเรียบร้อยแล้วครับ พร้อมเริ่มต้นใหม่ได้เลย!');
-}
+    function clearSession() {
+      if (!confirm('ล้างบทสนทนาทั้งหมด?')) return;
+      document.getElementById('messages-list').innerHTML = '';
+      ST.messages = []; ST.kb = [];
+      stopAudio(); renderKB();
+      addMsg('ai', 'ล้างข้อมูลเรียบร้อยแล้วครับ พร้อมเริ่มต้นใหม่ได้เลย!');
+    }
 
 
-function toggleKB() { document.getElementById('kb-panel').classList.toggle('open'); }
+    function toggleKB() { document.getElementById('kb-panel').classList.toggle('open'); }
 
-function saveConfig() {
-  const g = document.getElementById('gemini-key').value.trim();
-  const n = document.getElementById('n8n-webhook').value.trim();
-  if (g) { localStorage.setItem('gemini_key', g); CFG.geminiKey = g; }
-  if (n) { localStorage.setItem('n8n_webhook', n); CFG.n8nWebhook = n; }
-  showToast('✅', 'บันทึกการตั้งค่าสำเร็จ');
-  toggleKB();
-}
+    function saveConfig() {
+      const g = document.getElementById('gemini-key').value.trim();
+      const n = document.getElementById('n8n-webhook').value.trim();
+      if (g) { localStorage.setItem('gemini_key', g); CFG.geminiKey = g; }
+      if (n) { localStorage.setItem('n8n_webhook', n); CFG.n8nWebhook = n; }
+      showToast('✅', 'บันทึกการตั้งค่าสำเร็จ');
+      toggleKB();
+    }
 
-function exportSession() {
-  const blob = new Blob([JSON.stringify({
-    session: CFG.sessionId, teamName: CFG.teamName,
-    date: new Date().toISOString(), messages: ST.messages, kb: ST.kb
-  }, null, 2)], { type:'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `${CFG.teamName || CFG.sessionId}.json`;
-  a.click();
-  showToast('✅', 'Export สำเร็จ!');
-}
+    function exportSession() {
+      const blob = new Blob([JSON.stringify({
+        session: CFG.sessionId, teamName: CFG.teamName,
+        date: new Date().toISOString(), messages: ST.messages, kb: ST.kb
+      }, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${CFG.teamName || CFG.sessionId}.json`;
+      a.click();
+      showToast('✅', 'Export สำเร็จ!');
+    }
 
-// ============================================================
-// ADMIN SPEAK — พูดข้อความที่ admin กำหนดโดยตรง ไม่ผ่าน Gemini
-// ============================================================
-async function adminSpeak() {
-  const el = document.getElementById('admin-text');
-  const text = el.value.trim();
-  if (!text) { el.focus(); return; }
-  const key = CFG.geminiKey || localStorage.getItem('gemini_key');
-  if (!key) { showToast('🔑', 'กรุณาใส่ Gemini API Key ในตั้งค่า'); return; }
+    // ============================================================
+    // ADMIN SPEAK — พูดข้อความที่ admin กำหนดโดยตรง ไม่ผ่าน Gemini
+    // ============================================================
+    async function adminSpeak() {
+      const el = document.getElementById('admin-text');
+      const text = el.value.trim();
+      if (!text) { el.focus(); return; }
+      const key = CFG.geminiKey || localStorage.getItem('gemini_key');
+      if (!key) { showToast('🔑', 'กรุณาใส่ Gemini API Key ในตั้งค่า'); return; }
 
-  el.value = '';
-  el.style.borderColor = 'var(--border)';
+      el.value = '';
+      el.style.borderColor = 'var(--border)';
 
-  // แสดงใน chat ด้วย badge พิเศษ
-  const list = document.getElementById('messages-list');
-  const time = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-  const div = document.createElement('div');
-  div.className = 'msg ai';
-  div.innerHTML = `
+      // แสดงใน chat ด้วย badge พิเศษ
+      const list = document.getElementById('messages-list');
+      const time = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+      const div = document.createElement('div');
+      div.className = 'msg ai';
+      div.innerHTML = `
     <div class="msg-avatar ai"><img src="Besties.png" alt="AI" onerror="this.parentElement.textContent='B'"></div>
     <div>
       <div style="display:inline-block;background:rgba(232,92,13,0.1);border:1px solid rgba(232,92,13,0.25);color:var(--orange);font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;margin-bottom:5px;letter-spacing:0.4px;">🎙️ ADMIN</div>
       <div class="msg-bubble">${text}</div>
       <div class="msg-time">${time}</div>
     </div>`;
-  list.appendChild(div);
-  setTimeout(() => div.scrollIntoView({ behavior: 'smooth', block: 'end' }), 50);
+      list.appendChild(div);
+      setTimeout(() => div.scrollIntoView({ behavior: 'smooth', block: 'end' }), 50);
 
-  await speakText(text, key);
-}
-
-function replayMsg(id, btn) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const key = CFG.geminiKey || localStorage.getItem('gemini_key');
-  if (!key) { showToast('🔑', 'กรุณาใส่ Gemini API Key'); return; }
-  speakText(el.textContent, key, btn || null);
-}
-
-const GESTURE_DATA = {
-  '👋': { phrase: 'สวัสดีครับ ยินดีต้อนรับสู่การแข่งขัน', anim: 'gesture-bounce' },
-  '👍': { phrase: 'เห็นด้วยครับ ไอเดียนี้ดีมาก', anim: 'gesture-bounce' },
-  '🤔': { phrase: 'น่าสนใจนะครับ ขอคิดดูสักครู่', anim: 'gesture-shake' },
-  '👏': { phrase: 'ปรบมือให้เลยครับ ทำได้ยอดเยี่ยมมาก', anim: 'gesture-bounce' },
-  '☝️': { phrase: 'ขอแนะนำว่าควรอธิบายให้ชัดเจนขึ้นอีกนิดนะครับ', anim: 'gesture-pulse' },
-  '😐': { phrase: 'อืม ยังลังเลอยู่นิดหน่อยครับ', anim: 'gesture-shake' },
-  '🎉': { phrase: 'ยินดีด้วยครับ สุดยอดไปเลย', anim: 'gesture-bounce' },
-  '🙏': { phrase: 'ขอบคุณมากครับ ที่ให้เกียรติมาร่วมการแข่งขัน', anim: 'gesture-pulse' },
-};
-
-function triggerGesture(ev, icon, label) {
-  document.querySelectorAll('.gesture-btn').forEach(b => b.classList.remove('triggered'));
-  ev.currentTarget.classList.add('triggered');
-  setTimeout(() => ev.currentTarget.classList.remove('triggered'), 700);
-
-  // tagline
-  document.getElementById('avatar-tagline').textContent = `${icon} ${label}...`;
-  setTimeout(() => { document.getElementById('avatar-tagline').textContent = 'กรรมการ AI สำหรับการประกวดไอเดีย'; }, 2500);
-
-  // emoji overlay animation
-  const popEl = document.getElementById('gesture-emoji-pop');
-  if (popEl) {
-    popEl.textContent = icon;
-    popEl.classList.remove('show');
-    void popEl.offsetWidth; // reflow
-    popEl.classList.add('show');
-    setTimeout(() => popEl.classList.remove('show'), 1300);
-  }
-
-  // avatar animation
-  const wrapper = document.getElementById('avatar-wrapper');
-  const gdata = GESTURE_DATA[icon] || { anim: 'gesture-bounce' };
-  if (wrapper && !wrapper.classList.contains('speaking')) {
-    wrapper.classList.remove('gesture-bounce', 'gesture-shake', 'gesture-pulse');
-    void wrapper.offsetWidth;
-    wrapper.classList.add(gdata.anim);
-    setTimeout(() => wrapper.classList.remove('gesture-bounce', 'gesture-shake', 'gesture-pulse'), 600);
-  }
-
-  // TTS
-  if (gdata.phrase && CFG.geminiKey && !ST.isSpeaking) {
-    speakText(gdata.phrase, CFG.geminiKey);
-  }
-
-  dispBroadcast({ type: 'gesture', icon, label, anim: gdata.anim });
-  showToast(icon, label);
-}
-
-// ============================================================
-// TOAST
-// ============================================================
-let toastTimer;
-function showToast(icon, msg, ms=2500) {
-  clearTimeout(toastTimer);
-  document.getElementById('toast-icon').textContent = icon;
-  document.getElementById('toast-msg').textContent = msg;
-  document.getElementById('toast').classList.add('show');
-  toastTimer = setTimeout(() => document.getElementById('toast').classList.remove('show'), ms);
-}
-
-// ============================================================
-// TIMER
-// ============================================================
-const TMR = { total: 300, remaining: 300, running: false, iv: null };
-
-function timerFmt(s) {
-  const m = Math.floor(s / 60), sec = s % 60;
-  return `${m}:${String(sec).padStart(2,'0')}`;
-}
-
-function timerRender() {
-  const el   = document.getElementById('timer-display');
-  const fill = document.getElementById('timer-fill');
-  const btn  = document.getElementById('timer-start-btn');
-  if (!el) return;
-  const pct  = TMR.total > 0 ? (TMR.remaining / TMR.total) * 100 : 0;
-  const warn   = TMR.remaining <= TMR.total * 0.25;
-  const danger = TMR.remaining <= 30;
-  el.textContent = timerFmt(TMR.remaining);
-  el.className   = 'timer-display' + (danger ? ' danger' : warn ? ' warn' : '');
-  fill.style.width = pct + '%';
-  fill.style.background = danger ? '#DC2626' : warn ? '#E85C0D' : 'var(--green)';
-  btn.textContent = TMR.running ? '⏸' : '▶';
-  btn.classList.toggle('active', TMR.running);
-}
-
-function timerBroadcast() {
-  dispBroadcast({ type: 'timer', remaining: TMR.remaining, total: TMR.total, running: TMR.running, done: TMR.remaining === 0 });
-}
-
-function timerTick() {
-  if (TMR.remaining <= 0) {
-    TMR.running = false; clearInterval(TMR.iv); TMR.iv = null;
-    TMR.remaining = 0; timerRender(); timerBroadcast();
-    showToast('⏰', 'หมดเวลาแล้ว!'); return;
-  }
-  TMR.remaining--; timerRender(); timerBroadcast();
-}
-
-function timerToggle() {
-  if (TMR.remaining <= 0) return;
-  TMR.running = !TMR.running;
-  if (TMR.running) { TMR.iv = setInterval(timerTick, 1000); }
-  else             { clearInterval(TMR.iv); TMR.iv = null; }
-  timerRender(); timerBroadcast();
-}
-
-function timerReset() {
-  clearInterval(TMR.iv); TMR.iv = null; TMR.running = false;
-  TMR.remaining = TMR.total; timerRender(); timerBroadcast();
-}
-
-function timerPresetChange() {
-  const v = document.getElementById('timer-preset').value;
-  const customEl = document.getElementById('timer-custom');
-  if (v === 'custom') { customEl.style.display = 'block'; return; }
-  customEl.style.display = 'none';
-  clearInterval(TMR.iv); TMR.iv = null; TMR.running = false;
-  TMR.total = parseInt(v); TMR.remaining = TMR.total;
-  timerRender(); timerBroadcast();
-}
-
-function timerSetCustom() {
-  const min = parseInt(document.getElementById('timer-custom').value) || 5;
-  clearInterval(TMR.iv); TMR.iv = null; TMR.running = false;
-  TMR.total = min * 60; TMR.remaining = TMR.total;
-  timerRender(); timerBroadcast();
-}
-
-// ============================================================
-// DISPLAY BROADCAST
-// ============================================================
-let _dispCh = null;
-function dispCh() {
-  if (!_dispCh) {
-    try { _dispCh = new BroadcastChannel('besties-display'); } catch(e) {}
-  }
-  return _dispCh;
-}
-function dispBroadcast(msg) {
-  try {
-    dispCh()?.postMessage(msg);
-    // also persist latest state to localStorage for cold-open
-    if (msg.type === 'session' || msg.type === 'score') {
-      localStorage.setItem('besties_display_' + msg.type, JSON.stringify(msg));
+      await speakText(text, key);
     }
-  } catch(e) {}
-}
 
-// ============================================================
-// INIT
-// ============================================================
-window.addEventListener('load', () => {
-  const k = localStorage.getItem('gemini_key');
-  if (k) CFG.geminiKey = k;
+    function replayMsg(id, btn) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const key = CFG.geminiKey || localStorage.getItem('gemini_key');
+      if (!key) { showToast('🔑', 'กรุณาใส่ Gemini API Key'); return; }
+      speakText(el.textContent, key, btn || null);
+    }
 
-  // ล้างข้อมูล display เก่าออกจาก localStorage แล้วบอก display ให้ reset
-  localStorage.removeItem('besties_display_session');
-  localStorage.removeItem('besties_display_score');
-  dispBroadcast({ type: 'reset' });
+    const GESTURE_DATA = {
+      '👋': { phrase: 'สวัสดีครับ ยินดีต้อนรับสู่การแข่งขัน', anim: 'gesture-bounce' },
+      '👍': { phrase: 'เห็นด้วยครับ ไอเดียนี้ดีมาก', anim: 'gesture-bounce' },
+      '🤔': { phrase: 'น่าสนใจนะครับ ขอคิดดูสักครู่', anim: 'gesture-shake' },
+      '👏': { phrase: 'ปรบมือให้เลยครับ ทำได้ยอดเยี่ยมมาก', anim: 'gesture-bounce' },
+      '☝️': { phrase: 'ขอแนะนำว่าควรอธิบายให้ชัดเจนขึ้นอีกนิดนะครับ', anim: 'gesture-pulse' },
+      '😐': { phrase: 'อืม ยังลังเลอยู่นิดหน่อยครับ', anim: 'gesture-shake' },
+      '🎉': { phrase: 'ยินดีด้วยครับ สุดยอดไปเลย', anim: 'gesture-bounce' },
+      '🙏': { phrase: 'ขอบคุณมากครับ ที่ให้เกียรติมาร่วมการแข่งขัน', anim: 'gesture-pulse' },
+    };
 
-  timerRender();
+    function triggerGesture(ev, icon, label) {
+      document.querySelectorAll('.gesture-btn').forEach(b => b.classList.remove('triggered'));
+      ev.currentTarget.classList.add('triggered');
+      setTimeout(() => ev.currentTarget.classList.remove('triggered'), 700);
 
-  // แสดง session modal ทันทีเพื่อตั้งชื่อทีมแรก
-  setTimeout(() => showSessionModal(), 400);
-});
-</script>
+      // tagline
+      document.getElementById('avatar-tagline').textContent = `${icon} ${label}...`;
+      setTimeout(() => { document.getElementById('avatar-tagline').textContent = 'กรรมการ AI สำหรับการประกวดไอเดีย'; }, 2500);
+
+      // emoji overlay animation
+      const popEl = document.getElementById('gesture-emoji-pop');
+      if (popEl) {
+        popEl.textContent = icon;
+        popEl.classList.remove('show');
+        void popEl.offsetWidth; // reflow
+        popEl.classList.add('show');
+        setTimeout(() => popEl.classList.remove('show'), 1300);
+      }
+
+      // avatar animation
+      const wrapper = document.getElementById('avatar-wrapper');
+      const gdata = GESTURE_DATA[icon] || { anim: 'gesture-bounce' };
+      if (wrapper && !wrapper.classList.contains('speaking')) {
+        wrapper.classList.remove('gesture-bounce', 'gesture-shake', 'gesture-pulse');
+        void wrapper.offsetWidth;
+        wrapper.classList.add(gdata.anim);
+        setTimeout(() => wrapper.classList.remove('gesture-bounce', 'gesture-shake', 'gesture-pulse'), 600);
+      }
+
+      // TTS
+      if (gdata.phrase && CFG.geminiKey && !ST.isSpeaking) {
+        speakText(gdata.phrase, CFG.geminiKey);
+      }
+
+      dispBroadcast({ type: 'gesture', icon, label, anim: gdata.anim });
+      showToast(icon, label);
+    }
+
+    // ============================================================
+    // TOAST
+    // ============================================================
+    let toastTimer;
+    function showToast(icon, msg, ms = 2500) {
+      clearTimeout(toastTimer);
+      document.getElementById('toast-icon').textContent = icon;
+      document.getElementById('toast-msg').textContent = msg;
+      document.getElementById('toast').classList.add('show');
+      toastTimer = setTimeout(() => document.getElementById('toast').classList.remove('show'), ms);
+    }
+
+    // ============================================================
+    // TIMER — 3-phase (Pitch / AI Q&A / Jury)
+    // ============================================================
+    const PHASE_DEFS = {
+      pitch: { label: 'Pitch', seconds: 300 },
+      aiq: { label: 'AI Q&A', seconds: 300 },
+      jury: { label: 'กรรมการ', seconds: 300 },
+    };
+    const PHASES = {};
+    Object.keys(PHASE_DEFS).forEach(k => {
+      PHASES[k] = { total: PHASE_DEFS[k].seconds, remaining: PHASE_DEFS[k].seconds, running: false, iv: null };
+    });
+    let activePhase = 'pitch';
+
+    function timerFmt(s) {
+      const m = Math.floor(s / 60), sec = s % 60;
+      return `${m}:${String(sec).padStart(2, '0')}`;
+    }
+
+    function renderPhaseClocks() {
+      Object.keys(PHASES).forEach(k => {
+        const ph = PHASES[k];
+        const tab = document.getElementById('phase-tab-' + k);
+        const clk = document.getElementById('phase-clock-' + k);
+        if (clk) clk.textContent = timerFmt(ph.remaining);
+        if (tab) {
+          tab.classList.remove('active', 'running', 'done');
+          if (k === activePhase) tab.classList.add('active');
+          else if (ph.running) tab.classList.add('running');
+          else if (ph.remaining === 0) tab.classList.add('done');
+        }
+      });
+    }
+
+    function renderActiveTimer() {
+      const ph = PHASES[activePhase];
+      const el = document.getElementById('timer-display');
+      const fill = document.getElementById('timer-fill');
+      const btn = document.getElementById('timer-start-btn');
+      if (!el) return;
+      const pct = ph.total > 0 ? (ph.remaining / ph.total) * 100 : 0;
+      const warn = ph.remaining <= ph.total * 0.25;
+      const danger = ph.remaining <= 30;
+      el.textContent = timerFmt(ph.remaining);
+      el.className = 'timer-display' + (danger ? ' danger' : warn ? ' warn' : '');
+      fill.style.width = pct + '%';
+      fill.style.background = danger ? '#DC2626' : warn ? '#E85C0D' : 'var(--green)';
+      btn.textContent = ph.running ? '⏸' : '▶';
+      btn.classList.toggle('active', ph.running);
+      renderPhaseClocks();
+      dispBroadcast({ type: 'timer', phase: activePhase, label: PHASE_DEFS[activePhase].label, remaining: ph.remaining, total: ph.total, running: ph.running, done: ph.remaining === 0 });
+    }
+
+    function switchPhase(phase) {
+      activePhase = phase;
+      renderActiveTimer();
+    }
+
+    function timerTick() {
+      const ph = PHASES[activePhase];
+      if (ph.remaining <= 0) {
+        ph.running = false; clearInterval(ph.iv); ph.iv = null;
+        renderActiveTimer();
+        showToast('⏰', `หมดเวลา ${PHASE_DEFS[activePhase].label}!`);
+        return;
+      }
+      ph.remaining--;
+      renderActiveTimer();
+    }
+
+    function timerToggle() {
+      const ph = PHASES[activePhase];
+      if (ph.remaining <= 0) return;
+      ph.running = !ph.running;
+      if (ph.running) ph.iv = setInterval(timerTick, 1000);
+      else { clearInterval(ph.iv); ph.iv = null; }
+      renderActiveTimer();
+    }
+
+    function timerResetPhase() {
+      const ph = PHASES[activePhase];
+      clearInterval(ph.iv); ph.iv = null; ph.running = false;
+      ph.remaining = ph.total;
+      renderActiveTimer();
+    }
+
+    function resetAllPhases() {
+      Object.keys(PHASES).forEach(k => {
+        clearInterval(PHASES[k].iv); PHASES[k].iv = null;
+        PHASES[k].running = false;
+        PHASES[k].remaining = PHASES[k].total;
+      });
+      activePhase = 'pitch';
+      renderActiveTimer();
+    }
+
+    // ============================================================
+    // DISPLAY BROADCAST
+    // ============================================================
+    let _dispCh = null;
+    function dispCh() {
+      if (!_dispCh) {
+        try { _dispCh = new BroadcastChannel('besties-display'); } catch (e) { }
+      }
+      return _dispCh;
+    }
+    function dispBroadcast(msg) {
+      try {
+        dispCh()?.postMessage(msg);
+        // also persist latest state to localStorage for cold-open
+        if (msg.type === 'session' || msg.type === 'score') {
+          localStorage.setItem('besties_display_' + msg.type, JSON.stringify(msg));
+        }
+      } catch (e) { }
+    }
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    window.addEventListener('load', () => {
+      const k = localStorage.getItem('gemini_key');
+      if (k) CFG.geminiKey = k;
+
+      // ล้างข้อมูล display เก่าออกจาก localStorage แล้วบอก display ให้ reset
+      localStorage.removeItem('besties_display_session');
+      localStorage.removeItem('besties_display_score');
+      dispBroadcast({ type: 'reset' });
+
+      renderActiveTimer();
+
+      // แสดง session modal ทันทีเพื่อตั้งชื่อทีมแรก
+      setTimeout(() => showSessionModal(), 400);
+    });
+
+    // ============================================================
+    // JURY SCORES — ดึงจาก Google Sheet ผ่าน n8n
+    // ============================================================
+    async function fetchJuryScores() {
+      const base = getN8NBase();
+      if (!base) return '';
+      try {
+        const res = await fetch(`${base}/besties-jury?session=${encodeURIComponent(CFG.sessionId)}`);
+        if (!res.ok) return '';
+        const data = await res.json();
+        const judges = data.judges || data.rows || [];
+        if (!judges.length) return '';
+
+        let ctx = '\n\n[คะแนนจากกรรมการทั้งหมด]\n';
+        judges.forEach((j, i) => {
+          const name = j.name || j.judge_name || `กรรมการ ${i + 1}`;
+          ctx += `\n${name}:\n`;
+          const fields = {
+            'Business Impact': j.business_impact ?? j.businessImpact,
+            'AI Fit': j.ai_fit ?? j.aiFit,
+            'Feasibility': j.feasibility,
+            'Adoption': j.adoption,
+            'Risk': j.risk,
+          };
+          Object.entries(fields).forEach(([k, v]) => {
+            if (v !== undefined && v !== null) ctx += `  - ${k}: ${v}/10\n`;
+          });
+          const total = j.total ?? j.total_score;
+          if (total !== undefined) ctx += `  คะแนนรวม: ${total}/50\n`;
+          const comment = j.comment || j.feedback || j.comments;
+          if (comment) ctx += `  ความเห็น: ${comment}\n`;
+        });
+
+        if (data.averages || data.summary) {
+          const avg = data.averages || data.summary;
+          ctx += `\nค่าเฉลี่ยรวมทุกกรรมการ: ${avg.total ?? avg.avg_total ?? '—'}/50\n`;
+        }
+        return ctx;
+      } catch (e) {
+        console.warn('fetchJuryScores error:', e);
+        return '';
+      }
+    }
+  </script>
 </body>
+
 </html>

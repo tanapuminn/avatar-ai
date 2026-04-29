@@ -253,6 +253,77 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [960, 980]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "besties-jury",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-0016",
+      "name": "Webhook: Jury Scores",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 1220]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "1dd45yr9_ceioBxb6E6mQ-XQydVug77V4Ti5fFvdCB1o",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Jury Scores",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Session ID",
+              "lookupValue": "={{ $json.query.session }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-0017",
+      "name": "Sheets: Read Jury Scores",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [480, 1220],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "google-sheets-cred",
+          "name": "Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const rows = items.map(i => i.json);\n// Column names ใน Google Sheet (รองรับทั้งภาษาไทยและ key ย่อ)\nconst pick = (r, ...keys) => { for (const k of keys) { if (r[k] !== undefined && r[k] !== null && r[k] !== '') return Number(r[k]) || 0; } return 0; };\nconst judges = rows.map(r => ({\n  name:             r['Judge Name'] || r['ชื่อกรรมการ'] || r['name'] || '',\n  business_impact:  pick(r, 'Business Impact', 'business_impact', 'ปัญหาชัดเจนและผลกระทบ'),\n  ai_fit:           pick(r, 'AI Fit', 'ai_fit', 'ความเหมาะสมของ AI'),\n  data_feasibility: pick(r, 'Data Feasibility', 'data_feasibility', 'ข้อมูลและความเป็นไปได้', 'Feasibility'),\n  workflow_adoption:pick(r, 'Workflow Adoption', 'workflow_adoption', 'การนำไปใช้จริง', 'Adoption'),\n  risk_scalability: pick(r, 'Risk Scalability', 'risk_scalability', 'ความปลอดภัยและการขยายผล', 'Risk'),\n  comment:          r['Comment'] || r['ความเห็น'] || r['comment'] || '',\n  total:            Number(r['Total'] || r['คะแนนรวม'] || 0) ||\n    (pick(r,'Business Impact','business_impact') +\n     pick(r,'AI Fit','ai_fit') +\n     pick(r,'Data Feasibility','data_feasibility','Feasibility') +\n     pick(r,'Workflow Adoption','workflow_adoption','Adoption') +\n     pick(r,'Risk Scalability','risk_scalability','Risk'))\n}));\n// คำนวณ weighted score (30/20/20/20/10)\nconst weighted_fields = [\n  { key: 'business_impact',   w: 0.30 },\n  { key: 'ai_fit',            w: 0.20 },\n  { key: 'data_feasibility',  w: 0.20 },\n  { key: 'workflow_adoption', w: 0.20 },\n  { key: 'risk_scalability',  w: 0.10 },\n];\njudges.forEach(j => {\n  j.weighted_score = Math.round(weighted_fields.reduce((s,f) => s + (j[f.key]||0) * f.w * 10, 0) * 10) / 10;\n});\nconst allKeys = ['business_impact','ai_fit','data_feasibility','workflow_adoption','risk_scalability','total','weighted_score'];\nconst averages = {};\nallKeys.forEach(k => {\n  averages[k] = judges.length ? Math.round((judges.reduce((s,j) => s+(j[k]||0), 0) / judges.length) * 10) / 10 : 0;\n});\nreturn [{ json: { session: $('Webhook: Jury Scores').first().json.query.session, judges, averages } }];"
+      },
+      "id": "node-0018",
+      "name": "Format Jury Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 1220]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": { "responseCode": 200 }
+      },
+      "id": "node-0019",
+      "name": "Respond: Jury Scores",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [960, 1220]
     }
   ],
   "pinData": {},
@@ -305,6 +376,21 @@
     "Format Sessions": {
       "main": [
         [{ "node": "Respond: Sessions List", "type": "main", "index": 0 }]
+      ]
+    },
+    "Webhook: Jury Scores": {
+      "main": [
+        [{ "node": "Sheets: Read Jury Scores", "type": "main", "index": 0 }]
+      ]
+    },
+    "Sheets: Read Jury Scores": {
+      "main": [
+        [{ "node": "Format Jury Response", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format Jury Response": {
+      "main": [
+        [{ "node": "Respond: Jury Scores", "type": "main", "index": 0 }]
       ]
     }
   },
