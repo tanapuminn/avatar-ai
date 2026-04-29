@@ -109,6 +109,77 @@
     width: 100%; height: 100%; object-fit: cover; object-position: center 10%;
     display: block;
   }
+
+  /* Mouth animation overlay */
+  .mouth-overlay {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 14px;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* Default smile mouth (A/I shape) */
+  .mouth-overlay::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #2a1a1a;
+    border-radius: 0 0 50% 50% / 0 0 100% 100%;
+    box-shadow: inset 0 -3px 8px rgba(0, 0, 0, 0.4);
+  }
+
+  .mouth-overlay::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 85%;
+    height: 60%;
+    background: radial-gradient(ellipse at center top, #d45d5d 0%, #b84545 60%, #8a2f2f 100%);
+    border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  }
+
+  /* Speaking animation - cycle through different mouth shapes */
+  .avatar-wrapper.speaking .mouth-overlay {
+    animation: mouth-talk 0.6s ease-in-out infinite;
+  }
+
+  @keyframes mouth-talk {
+    0% {
+      /* A/I - wide smile */
+      transform: translateX(-50%) scaleY(1) scaleX(1);
+    }
+    16% {
+      /* E - medium smile */
+      transform: translateX(-50%) scaleY(0.85) scaleX(0.95);
+    }
+    33% {
+      /* O - round open */
+      transform: translateX(-50%) scaleY(1.3) scaleX(0.7);
+    }
+    50% {
+      /* U - small round */
+      transform: translateX(-50%) scaleY(0.9) scaleX(0.65);
+    }
+    66% {
+      /* F/V - horizontal */
+      transform: translateX(-50%) scaleY(0.5) scaleX(1.1);
+    }
+    83% {
+      /* L - medium open */
+      transform: translateX(-50%) scaleY(1.1) scaleX(0.85);
+    }
+    100% {
+      /* Back to smile */
+      transform: translateX(-50%) scaleY(1) scaleX(1);
+    }
+  }
   .avatar-wrapper.speaking {
     border-color: var(--yellow);
     animation: ring-pulse 0.7s ease-in-out infinite alternate;
@@ -333,6 +404,7 @@
       <div class="avatar-wrapper" id="d-avatar-wrapper">
         <img src="Besties.png" alt="Besties AI"
           onerror="this.style.display='none'">
+        <div class="mouth-overlay"></div>
         <div class="gesture-overlay">
           <div class="gesture-pop" id="d-gesture-pop"></div>
         </div>
